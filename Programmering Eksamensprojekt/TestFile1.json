@@ -1,0 +1,10 @@
+{
+  "Størrelse": {
+    "Masse" : 1, "Rumfang" : 2, "Densitet" : 3,"Tyngdeacceleration": 4,"Tyngdekraft": 5,
+  }
+  "Formler": {
+    "mvp": [ 1, 2, 3 ],
+    "Ftmg":[ 1,4,5]
+  }
+   
+  }
