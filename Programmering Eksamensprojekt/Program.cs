@@ -23,3 +23,42 @@ class Testing
         Console.WriteLine($"Masse:{størrelse.Masse}");
     }
 }
+
+class SorterTest
+{
+    static void Main()
+    {
+        // Define available lists of units
+        List<List<string>> unitGroups = new List<List<string>>
+        {
+            new List<string> { "A", "B", "C" },
+            new List<string> { "A", "B" },
+            new List<string> { "A", "C" },
+            new List<string> { "B", "C" },
+            new List<string> { "A", "B", "C", "D" } // This one has an extra unit and should be ignored
+        };
+
+        // Input required units
+        HashSet<string> requiredUnits = new HashSet<string> { "A", "B" };
+
+        // Find matching unit lists
+        var matchingGroups = unitGroups
+            .Where(group => new HashSet<string>(group).SetEquals(requiredUnits))
+            .ToList();
+
+        // Print results
+        if (matchingGroups.Count > 0)
+        {
+            Console.WriteLine("Yuh:");
+            foreach (var group in matchingGroups)
+            {
+                Console.WriteLine($"[{string.Join(", ", group)}]");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Nah.");
+        }
+        
+    }
+}
