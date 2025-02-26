@@ -1,7 +1,56 @@
 ﻿@page "/"
+@using System.Text.Json
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+<p>@pString</p>
+<p>@p1String</p
+<p>@p2String</p>
+<p>@p3String</p>
+<p>@p4String</p>
+@code {
+        string pString = "";
+        string p1String = "";
+        string p2String = "";
+        string p3String = "";
+        string p4String = "";
+        List<List<string>> unitGroups = new List<List<string>>
+        {
+            new List<string> { "A", "B", "C" },
+            new List<string> { "A", "B" },
+            new List<string> { "A", "C" },
+            new List<string> { "B", "C" },
+            new List<string> { "A", "B", "C", "D" } // This one has an extra unit and should be ignored
+        };
+    protected override async Task OnInitializedAsync()
+    {
+        
+        // Input required units
+        HashSet<string> requiredUnits = new HashSet<string> { "D", "B" };
+        pString = "Made It";
+        // Find matching unit lists
+        var matchingGroups = unitGroups
+            .Where(group => new HashSet<string>(group).SetEquals(requiredUnits))
+            .ToList();
+        p1String = "Second"; 
+    // Print results
+        if (matchingGroups.Count > 0)
+        {
+            p2String = "Yuh";
+            //foreach (var group in matchingGroups)
+           // {
+                //p3String =($"[{string.Join(", ", group)}]");
+            //}
+        }
+        else
+        {
+            p4String ="Nah.";
+        }
+       
+    }
+
+ 
+    
+}
