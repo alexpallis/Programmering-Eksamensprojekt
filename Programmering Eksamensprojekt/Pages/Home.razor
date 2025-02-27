@@ -11,12 +11,12 @@
 <p>@p3String</p>
 <p>@p4String</p>
 @code {
-        string pString = "";
-        string p1String = "";
-        string p2String = "";
-        string p3String = "";
-        string p4String = "";
-        List<List<string>> unitGroups = new List<List<string>>
+    string pString = "";
+    string p1String = "";
+    string p2String = "";
+    string p3String = "";
+    string p4String = "";
+    List<List<string>> unitGroups = new List<List<string>>
         {
             new List<string> { "A", "B", "C" },
             new List<string> { "A", "B" },
@@ -26,9 +26,11 @@
         };
     protected override async Task OnInitializedAsync()
     {
-        
+        var Output = "A";
+        var Input = new List<string> { "B","C" };
         // Input required units
-        HashSet<string> requiredUnits = new HashSet<string> { "D", "B" };
+        HashSet<string> requiredUnits = new HashSet<string> {Output};
+        requiredUnits.UnionWith(Input);
         pString = "Made It";
         // Find matching unit lists
         var matchingGroups = unitGroups
@@ -39,14 +41,14 @@
         if (matchingGroups.Count > 0)
         {
             p2String = "Yuh";
-            //foreach (var group in matchingGroups)
-           // {
-                //p3String =($"[{string.Join(", ", group)}]");
-            //}
+           foreach (var group in matchingGroups)
+            {
+                p3String = $"[{string.Join(", ", group)}]";
+            }
         }
         else
         {
-            p4String ="Nah.";
+            p2String ="Nah.";
         }
        
     }
