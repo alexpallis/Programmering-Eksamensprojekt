@@ -10,45 +10,94 @@
 <p>@p2String</p>
 <p>@p3String</p>
 <p>@p4String</p>
+<p>@p5String</p>
+<p>@p6String</p>
+<p>@p7String</p>
+<p>@p8String</p>
+<p>@p9String</p>
 @code {
     string pString = "";
     string p1String = "";
     string p2String = "";
     string p3String = "";
     string p4String = "";
+    string p5String = "";
+    string p6String = "";
+    string p7String = "";
+    string p8String = "";
+    string p9String = "";
     List<List<string>> unitGroups = new List<List<string>>
         {
-            new List<string> { "A", "B", "C" },
-            new List<string> { "A", "B" },
-            new List<string> { "A", "C" },
+            new List<string> { "A", "B", "E", "F" ,"G"},
+            new List<string> { "D", "G" },
+            new List<string> { "Q", "Q" },
             new List<string> { "B", "C" },
-            new List<string> { "A", "B", "C", "D" } // This one has an extra unit and should be ignored
+            new List<string> { "A", "B", "Q" } // This one has an extra unit and should be ignored
         };
     protected override async Task OnInitializedAsync()
     {
-        var Output = "A";
-        var Input = new List<string> { "B","C" };
+        var Output = "E";
+        var Input = new List<string> { "B","A","D","F"};
+        HashSet<string> hashSetInput = new HashSet<string>(Input);
         // Input required units
         HashSet<string> requiredUnits = new HashSet<string> {Output};
         requiredUnits.UnionWith(Input);
         pString = "Made It";
         // Find matching unit lists
         var matchingGroups = unitGroups
-            .Where(group => new HashSet<string>(group).SetEquals(requiredUnits))
+            .Where(group => new HashSet<string>(group).IsSubsetOf(requiredUnits))
             .ToList();
         p1String = "Second"; 
-    // Print results
+        // Print results
         if (matchingGroups.Count > 0)
         {
             p2String = "Yuh";
-           foreach (var group in matchingGroups)
+            foreach (var group in matchingGroups)
             {
-                p3String = $"[{string.Join(", ", group)}]";
+                p3String = $"{string.Join(", ", group)}";
             }
         }
         else
         {
-            p2String ="Nah.";
+            p2String ="Level 2";
+            //Creates a list of equations containing the output
+            var groupsWithOutput = unitGroups
+            .Where(group => new HashSet<string>(group).Contains(Output))
+            .ToList();
+
+            List<List<string>> matchingGroups2 = new List<List<string>>();
+
+            for (int i = 0; i < groupsWithOutput.Count; i++)
+            {
+               
+                //Creates a hashset of all the missing variables
+                HashSet<string> hashSetMissingVariables = new HashSet<string>(groupsWithOutput[i]);
+                hashSetMissingVariables.Remove(Output);
+                hashSetMissingVariables.UnionWith(Input);
+                hashSetMissingVariables.ExceptWith(Input);
+                
+                //Checks if any equation from the list contains the missing variables and does not contain any new unknown variables
+                for (int j = 0; j < unitGroups.Count; j++)
+                {
+                    HashSet<string> hashSetunitGroups = new HashSet<string>(unitGroups[j]);
+                    if (hashSetunitGroups.IsSupersetOf(hashSetMissingVariables))
+                    {
+                        hashSetunitGroups.ExceptWith(hashSetMissingVariables);
+                        if(hashSetInput.IsSupersetOf(hashSetunitGroups))
+                        {
+                            //Adds the two equations needed to a list
+                            matchingGroups2.Add(unitGroups[j]);
+                            matchingGroups2.Add(groupsWithOutput[i]);
+                        }
+                    }
+                }
+            }
+            if (matchingGroups2.Count > 0)
+            {
+                p5String = "lets goo";
+                p6String = $"{string.Join(", ", matchingGroups2[0])}";
+                p7String = $"{string.Join(", ", matchingGroups2[1])}";
+            }
         }
        
     }
