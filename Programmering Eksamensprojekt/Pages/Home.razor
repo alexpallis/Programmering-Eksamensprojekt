@@ -41,7 +41,7 @@
     protected override async Task OnInitializedAsync()
     {
         bool Succes = false;
-        var Output = "D";
+        var Output = "F";
         var Input = new List<string> {"A"};
         HashSet<string> HSInput = new HashSet<string>(Input);
         // Input required units
@@ -67,7 +67,7 @@
             Succes = Search(Output, HSInput, AlreadyFound);
             if (Succes == true)
             {
-                p10String = "Succes";
+                //p10String = "Succes";
             }
             else
             {
@@ -80,11 +80,16 @@
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound)
     {
         p2String = "Level 2";
-        //Creates a list of equations containing the output
+        //Creates a list of equations containing the output and not containing any already found equations
         List<List<string>> groupsWithOutput = unitGroups
         .Where(group => new HashSet<string>(group).Contains(Output))
         .Except(AlreadyFound)
         .ToList();
+        unitGroups.Except(AlreadyFound);
+        if (groupsWithOutput.Count == 0)
+        {
+            return false;
+        }
 
         List<List<string>> matchingGroups2 = new List<List<string>>();
         List<List<string>> matchingGroups3 = new List<List<string>>();
@@ -125,8 +130,8 @@
                     }
                 }
             }
-            HashSet<string> mergedSet = matchingGroups3.SelectMany(set => set).ToHashSet();
-            if (mergedSet.IsSupersetOf(HSMissingVariables))
+            HashSet<string> mergedMatchingGroups3 = matchingGroups3.SelectMany(set => set).ToHashSet();
+            if (mergedMatchingGroups3.IsSupersetOf(HSMissingVariables))
             {
                 matchingGroups3.Add(groupsWithOutput[i]);
             }
@@ -138,8 +143,8 @@
         if (matchingGroups2.Count > 0)
         {
             p5String = "lets goo";
-            p6String = $"{string.Join(", ", matchingGroups2[0])}";
-            p7String = $"{string.Join(", ", matchingGroups2[1])}";
+            p6String = $"{string.Join(", ", matchingGroups2[0])}" + "6";
+            p7String = $"{string.Join(", ", matchingGroups2[1])}" + "7";
             return true;
         }
         else if (matchingGroups3.Count > 0)
@@ -155,8 +160,6 @@
         }
         else
         {
-            if (AlreadyFound.Count == 0)
-            {
                 for (int i = 0; i < groupsWithOutput.Count; i++)
                 {
                     bool idk = true;
@@ -165,24 +168,33 @@
                     HSMissingVariables.Remove(Output);
                     HSMissingVariables.UnionWith(HSInput);
                     HSMissingVariables.ExceptWith(HSInput);
+                    
                     AlreadyFound.Add(groupsWithOutput[i]);
+                    //searches with the same method to try to find the remaining equations, and leaves out the already found equation. 
                     foreach (string variable in HSMissingVariables)
                     {
                         if(Search(variable, HSInput, AlreadyFound) != true)
                         {
                             idk = false;
-                            AlreadyFound.Remove(groupsWithOutput[i]);
+                            AlreadyFound.Clear();
+                            //AlreadyFound.Remove(groupsWithOutput[i]);
                             break;
                         }
                     }
                     if (idk == true)
                     {
-                        p8String = $"{string.Join(", ", AlreadyFound[0])}";
-                        p9String = $"{string.Join(", ", AlreadyFound[1])}";
+                        HashSet<string> mergedAlreadyFound = AlreadyFound.SelectMany(set => set).ToHashSet();
+                        p8String = $"{string.Join(", ", mergedAlreadyFound)}" + "8";
+                        p8String = $"{string.Join(", ", AlreadyFound[0])}" + "9";
+                        p9String = $"{string.Join(", ", AlreadyFound[1])}"+ "9";
+                        //p10String = $"{string.Join(", ", AlreadyFound[2])}";
                         return true;
                     }
+                    else
+                    {
+                        AlreadyFound.Clear();
+                    }
                 }
-            }
             return false;
         }
     }
