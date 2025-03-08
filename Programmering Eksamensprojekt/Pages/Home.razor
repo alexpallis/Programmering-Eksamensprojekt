@@ -15,6 +15,7 @@
 <p>@p7String</p>
 <p>@p8String</p>
 <p>@p9String</p>
+<p>@p10String</p>
 @code {
     string pString = "";
     string p1String = "";
@@ -26,33 +27,26 @@
     string p7String = "";
     string p8String = "";
     string p9String = "";
+    string p10String = "";
     List<List<string>> unitGroups = new List<List<string>>
             {
                 new List<string> { "A", "B", "C", "D", "E", "F", "G", "H" },
                 new List<string> { "A", "B" },
-                new List<string> { "W", "D" },
+                new List<string> { "C", "D" },
                 new List<string> { "B", "C" },
-                //new List<string> { "A", "B","C", "E"}, // This one has an extra unit and should be ignored
-                //new List<string> { "A", "E", "W", "G" },
-                //new List<string> { "W", "E" },
-                new List<string> { "Q","F" },
-                //new List<string> { "2", "C" },
-                //new List<string> { "A", "q","E", "E"},
-                //new List<string> { "A", "Q", "W" },
-                //new List<string> { "E", "U" },
-                new List<string> { "O", "G" },
-                //new List<string> { "B", "C" },
-  
+                new List<string> { "E","D" },
+                new List<string> { "O", "G" }
+
             };
     protected override async Task OnInitializedAsync()
     {
-        var Output = "H";
-        var Input = new List<string> { "A", "B", "W", "Q", "O", "E"};
+        bool Succes = false;
+        var Output = "D";
+        var Input = new List<string> {"A"};
         HashSet<string> HSInput = new HashSet<string>(Input);
         // Input required units
         HashSet<string> requiredUnits = new HashSet<string> {Output};
         requiredUnits.UnionWith(Input);
-        pString = "Made It";
         // Find matching unit lists
         var matchingGroups = unitGroups
             .Where(group => new HashSet<string>(group).IsSubsetOf(requiredUnits) && new HashSet<string>(group).Contains(Output))
@@ -69,82 +63,128 @@
         }
         else
         {
-            p2String ="Level 2";
-            //Creates a list of equations containing the output
-            var groupsWithOutput = unitGroups
-            .Where(group => new HashSet<string>(group).Contains(Output))
-            .ToList();
-
-            List<List<string>> matchingGroups2 = new List<List<string>>();
-            List<List<string>> matchingGroups3 = new List<List<string>>();
-
-            for (int i = 0; i < groupsWithOutput.Count; i++)
+            List<List<string>> AlreadyFound = new List<List<string>>();
+            Succes = Search(Output, HSInput, AlreadyFound);
+            if (Succes == true)
             {
-
-                //Creates a hashset of all the missing variables
-                HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
-                HSMissingVariables.Remove(Output);
-                HSMissingVariables.UnionWith(Input);
-                HSMissingVariables.ExceptWith(Input);
-
-                //Checks if any equation from the list contains the missing variables and does not contain any new unknown variables
-                for (int j = 0; j < unitGroups.Count; j++)
-                {
-                    if (!groupsWithOutput[i].SequenceEqual(unitGroups[j]))
-                    {
-                        HashSet<string> HSunitGroups = new HashSet<string>(unitGroups[j]);
-                        if (HSunitGroups.IsSupersetOf(HSMissingVariables) && HSMissingVariables.Count == 1)
-                        {
-                            HSunitGroups.ExceptWith(HSMissingVariables);
-                            if (HSInput.IsSupersetOf(HSunitGroups))
-                            {
-                                //Adds the two equations needed to a list
-                                matchingGroups2.Add(unitGroups[j]);
-                                matchingGroups2.Add(groupsWithOutput[i]);
-                            }
-                        }
-                        else if (HSunitGroups.Overlaps(HSMissingVariables) && HSunitGroups.Count(HSMissingVariables.Contains) == 1)
-                        {
-                            //Adds alle equations with a missing variable, where the rest of the variables are known, to a list.
-                            HSunitGroups.ExceptWith(HSMissingVariables);
-                            if (HSInput.IsSupersetOf(HSunitGroups))
-                            {
-                                matchingGroups3.Add(unitGroups[j]);
-                            }
-
-                        }
-                    }
-                }
-                HashSet<string> mergedSet = matchingGroups3.SelectMany(set => set).ToHashSet();
-                if (mergedSet.IsSupersetOf(HSMissingVariables))
-                {
-                    matchingGroups3.Add(groupsWithOutput[i]);
-                }
-                else
-                {
-                    matchingGroups3.Clear();
-                }
+                p10String = "Succes";
             }
-            if (matchingGroups2.Count > 0)
+            else
             {
-                p5String = "lets goo";
-                p6String = $"{string.Join(", ", matchingGroups2[0])}";
-                p7String = $"{string.Join(", ", matchingGroups2[1])}";
-            }
-            else if (matchingGroups3.Count > 0)
-            {
-                p5String = "lol";
-                p6String = $"{string.Join(", ", matchingGroups3[0])}";
-                p7String = $"{string.Join(", ", matchingGroups3[1])}";
-                p8String = $"{string.Join(", ", matchingGroups3[2])}";
-                p9String = $"{string.Join(", ", matchingGroups3[3])}";
-                p5String = $"{string.Join(", ", matchingGroups3[4])}";
-                p4String = $"{string.Join(", ", matchingGroups3[5])}";
-
+                p10String = "Fail";
             }
 
         }
-       
+
+    }
+    private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound)
+    {
+        p2String = "Level 2";
+        //Creates a list of equations containing the output
+        List<List<string>> groupsWithOutput = unitGroups
+        .Where(group => new HashSet<string>(group).Contains(Output))
+        .Except(AlreadyFound)
+        .ToList();
+
+        List<List<string>> matchingGroups2 = new List<List<string>>();
+        List<List<string>> matchingGroups3 = new List<List<string>>();
+
+        for (int i = 0; i < groupsWithOutput.Count; i++)
+        {
+
+            //Creates a hashset of all the missing variables
+            HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
+            HSMissingVariables.Remove(Output);
+            HSMissingVariables.UnionWith(HSInput);
+            HSMissingVariables.ExceptWith(HSInput);
+
+            //Checks if any equation from the list contains the missing variables and does not contain any new unknown variables
+            for (int j = 0; j < unitGroups.Count; j++)
+            {
+                if (!groupsWithOutput[i].SequenceEqual(unitGroups[j]))
+                {
+                    HashSet<string> HSunitGroups = new HashSet<string>(unitGroups[j]);
+                    if (HSunitGroups.IsSupersetOf(HSMissingVariables) && HSMissingVariables.Count == 1)
+                    {
+                        HSunitGroups.ExceptWith(HSMissingVariables);
+                        if (HSInput.IsSupersetOf(HSunitGroups))
+                        {
+                            //Adds the two equations needed to a list
+                            matchingGroups2.Add(unitGroups[j]);
+                            matchingGroups2.Add(groupsWithOutput[i]);
+                        }
+                    }
+                    else if (HSunitGroups.Overlaps(HSMissingVariables) && HSunitGroups.Count(HSMissingVariables.Contains) == 1)
+                    {
+                        //Adds alle equations with a missing variable, where the rest of the variables are known, to a list.
+                        HSunitGroups.ExceptWith(HSMissingVariables);
+                        if (HSInput.IsSupersetOf(HSunitGroups))
+                        {
+                            matchingGroups3.Add(unitGroups[j]);
+                        }
+                    }
+                }
+            }
+            HashSet<string> mergedSet = matchingGroups3.SelectMany(set => set).ToHashSet();
+            if (mergedSet.IsSupersetOf(HSMissingVariables))
+            {
+                matchingGroups3.Add(groupsWithOutput[i]);
+            }
+            else
+            {
+                matchingGroups3.Clear();
+            }
+        }
+        if (matchingGroups2.Count > 0)
+        {
+            p5String = "lets goo";
+            p6String = $"{string.Join(", ", matchingGroups2[0])}";
+            p7String = $"{string.Join(", ", matchingGroups2[1])}";
+            return true;
+        }
+        else if (matchingGroups3.Count > 0)
+        {
+            p10String = "lol";
+            p6String = $"{string.Join(", ", matchingGroups3[0])}";
+            p7String = $"{string.Join(", ", matchingGroups3[1])}";
+            p8String = $"{string.Join(", ", matchingGroups3[2])}";
+            p9String = $"{string.Join(", ", matchingGroups3[3])}";
+            p5String = $"{string.Join(", ", matchingGroups3[4])}";
+            return true;
+
+        }
+        else
+        {
+            if (AlreadyFound.Count == 0)
+            {
+                for (int i = 0; i < groupsWithOutput.Count; i++)
+                {
+                    bool idk = true;
+                    //Creates a hashset of all the missing variables
+                    HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
+                    HSMissingVariables.Remove(Output);
+                    HSMissingVariables.UnionWith(HSInput);
+                    HSMissingVariables.ExceptWith(HSInput);
+                    AlreadyFound.Add(groupsWithOutput[i]);
+                    foreach (string variable in HSMissingVariables)
+                    {
+                        if(Search(variable, HSInput, AlreadyFound) != true)
+                        {
+                            idk = false;
+                            AlreadyFound.Remove(groupsWithOutput[i]);
+                            break;
+                        }
+                    }
+                    if (idk == true)
+                    {
+                        p8String = $"{string.Join(", ", AlreadyFound[0])}";
+                        p9String = $"{string.Join(", ", AlreadyFound[1])}";
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
  
