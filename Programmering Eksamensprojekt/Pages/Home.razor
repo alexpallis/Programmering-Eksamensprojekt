@@ -1,5 +1,8 @@
 ﻿@page "/"
 @using System.Text.Json
+@using System.IO
+@using Microsoft.AspNetCore.Components
+@inject HttpClient Http
 
 <PageTitle>Home</PageTitle>
 
@@ -28,36 +31,45 @@
     string p8String = "";
     string p9String = "";
     string p10String = "";
-    List<List<string>> unitGroups = new List<List<string>>
-            {
-                /*new List<string> { "A", "B", "C", "E", "F", "G", "H" },
-                new List<string> { "A", "B", },
-                new List<string> { "C", "D" },
-                new List<string> { "B", "C", "O"},
-                new List<string> { "E","D", "G" },
-                new List<string> { "O", "G" },
-                new List<string> { "G", "Q", "W" },
-                new List<string> { "A", "B"},
-                new List<string> { "O", "F" }*/
-                new List<string> { "A", "B", },
-                new List<string> { "C", "D" },
-                new List<string> { "B", "C", "O"},
+    List<List<string>> unitGroups = new List<List<string>>();
 
-            };
     protected override async Task OnInitializedAsync()
     {
+        try
+        {
+            var json = await Http.GetStringAsync("unitGroups.json");
+            var parsedData = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+            if (parsedData != null && parsedData.ContainsKey("Formler"))
+            {
+                var formulasJson = parsedData["Formler"].ToString();
+                var formulas = JsonSerializer.Deserialize<Dictionary<string, List<int>>>(formulasJson);
+                if (formulas != null)
+                {
+                    unitGroups = formulas.Values.Select(list => list.Select(i => i.ToString()).ToList()).ToList();
+                }
+            }
+            pString = "JSON virker hype.";
+        }
+
+       catch (JsonException jex)
+        {
+            pString = $"JSON virker ikke (mindre hype): {jex.Message}";
+        }
+        catch (Exception ex)
+        {
+            pString = $"Error loading JSON: {ex.Message}";
+        }
+
         bool Succes = false;
-        var Output = "D";
-        var Input = new List<string> {"A","O"};
+        var Output = "5";
+        var Input = new List<string> { "2", "3","4" };
         HashSet<string> HSInput = new HashSet<string>(Input);
-        // Input required units
-        HashSet<string> requiredUnits = new HashSet<string> {Output};
+        HashSet<string> requiredUnits = new HashSet<string> { Output };
         requiredUnits.UnionWith(Input);
-        // Find matching unit lists
         var matchingGroups = unitGroups
             .Where(group => new HashSet<string>(group).IsSubsetOf(requiredUnits) && new HashSet<string>(group).Contains(Output))
             .ToList();
-        // Print results
+
         if (matchingGroups.Count > 0)
         {
             foreach (var group in matchingGroups)
@@ -67,56 +79,36 @@
         }
         else
         {
-            List<List<string>> AlreadyFound = new List<List<string>>(); //List of already found equations to avoid loops
-            List<List<string>> FinalEquations = new List<List<string>>(); //List of final equations that are shown to the user
-            Succes = Search(Output, HSInput, AlreadyFound, FinalEquations); //searches for the output
-            
-            //Prints all the final equations:
+            List<List<string>> AlreadyFound = new List<List<string>>();
+            List<List<string>> FinalEquations = new List<List<string>>();
+            Succes = Search(Output, HSInput, AlreadyFound, FinalEquations);
             FinalEquations.AddRange(AlreadyFound);
             List<string> mergedFinalEquations = FinalEquations.Select(sublist => string.Join(",", sublist)).ToList();
             List<string> UniqueFinalEquations = mergedFinalEquations.Distinct().ToList();
             p8String = $"{string.Join("; ", UniqueFinalEquations)}";
-
-            if (Succes == true)
-            {
-                p10String = "Succes";
-
-            }
-            else
-            {
-                p10String = "Fail";
-            }
-
+            p10String = Succes ? "Succes" : "Fail";
         }
-
     }
-    //The search method
+
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations)
     {
-        //Creates a list of equations containing the output and not containing any already found equations
         List<List<string>> groupsWithOutput = unitGroups
         .Where(group => new HashSet<string>(group).Contains(Output))
         .Except(AlreadyFound)
         .ToList();
         unitGroups.Except(AlreadyFound);
-        if (groupsWithOutput.Count == 0)
-        {
-            return false;
-        }
+        if (groupsWithOutput.Count == 0) return false;
 
         List<List<string>> matchingGroups2 = new List<List<string>>();
         List<List<string>> matchingGroups3 = new List<List<string>>();
 
         for (int i = 0; i < groupsWithOutput.Count; i++)
         {
-
-            //Creates a hashset of all the missing variables
             HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
             HSMissingVariables.Remove(Output);
             HSMissingVariables.UnionWith(HSInput);
             HSMissingVariables.ExceptWith(HSInput);
 
-            //Checks if any equation from the list contains the missing variables and does not contain any new unknown variables
             for (int j = 0; j < unitGroups.Count; j++)
             {
                 if (!groupsWithOutput[i].SequenceEqual(unitGroups[j]))
@@ -127,14 +119,12 @@
                         HSunitGroups.ExceptWith(HSMissingVariables);
                         if (HSInput.IsSupersetOf(HSunitGroups))
                         {
-                            //Adds the two equations needed to a list
                             matchingGroups2.Add(unitGroups[j]);
                             matchingGroups2.Add(groupsWithOutput[i]);
                         }
                     }
                     else if (HSunitGroups.Overlaps(HSMissingVariables) && HSunitGroups.Count(HSMissingVariables.Contains) == 1)
                     {
-                        //Adds alle equations with a missing variable, where the rest of the variables are known, to a list.
                         HSunitGroups.ExceptWith(HSMissingVariables);
                         if (HSInput.IsSupersetOf(HSunitGroups))
                         {
@@ -155,7 +145,6 @@
         }
         if (matchingGroups2.Count > 0)
         {
-            //Adds all the found matching equations to the final equations list
             foreach (var group in matchingGroups2)
             {
                 FinalEquations.Add(group);
@@ -164,48 +153,36 @@
         }
         else if (matchingGroups3.Count > 0)
         {
-            //Adds all the found matching equations to the final equations list
             foreach (var group in matchingGroups3)
             {
                 FinalEquations.Add(group);
             }
             return true;
-
         }
         else
         {
-                for (int i = 0; i < groupsWithOutput.Count; i++)
+            for (int i = 0; i < groupsWithOutput.Count; i++)
+            {
+                bool allVariablesFound = true;
+                HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
+                HSMissingVariables.Remove(Output);
+                HSMissingVariables.UnionWith(HSInput);
+                HSMissingVariables.ExceptWith(HSInput);
+                AlreadyFound.Add(groupsWithOutput[i]);
+                foreach (string variable in HSMissingVariables)
                 {
-                    bool allVariablesFound = true;
-                    //Creates a hashset of all the missing variables
-                    HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
-                    HSMissingVariables.Remove(Output);
-                    HSMissingVariables.UnionWith(HSInput);
-                    HSMissingVariables.ExceptWith(HSInput);
-                    
-                    AlreadyFound.Add(groupsWithOutput[i]);
-                    //searches with the same method to try to find the remaining equations, and leaves out the already found equation. 
-                    foreach (string variable in HSMissingVariables)
+                    if (!Search(variable, HSInput, AlreadyFound, FinalEquations))
                     {
-                    if (Search(variable, HSInput, AlreadyFound, FinalEquations) != true)
-                        {
-                            //Clears the list of already found equations and final equations, becuase all variables could not be found
-                            allVariablesFound = false;
-                            AlreadyFound.Clear();
-                            FinalEquations.Clear();
-                            break;
-                        }
-                    }
-                    //returns a succes if all variables to an equation with output was found
-                    if (allVariablesFound == true)
-                    {
-                        return true;
+                        allVariablesFound = false;
+                        AlreadyFound.Clear();
+                        FinalEquations.Clear();
+                        break;
                     }
                 }
+                if (allVariablesFound) return true;
+            }
             return false;
         }
-    }
 
- 
-    
+    }
 }
