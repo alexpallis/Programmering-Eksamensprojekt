@@ -30,19 +30,25 @@
     string p10String = "";
     List<List<string>> unitGroups = new List<List<string>>
             {
-                new List<string> { "A", "B", "C", "D", "E", "F", "G", "H" },
-                new List<string> { "A", "B" },
+                /*new List<string> { "A", "B", "C", "E", "F", "G", "H" },
+                new List<string> { "A", "B", },
                 new List<string> { "C", "D" },
-                new List<string> { "B", "C" },
-                new List<string> { "E","D" },
-                new List<string> { "O", "G" }
+                new List<string> { "B", "C", "O"},
+                new List<string> { "E","D", "G" },
+                new List<string> { "O", "G" },
+                new List<string> { "G", "Q", "W" },
+                new List<string> { "A", "B"},
+                new List<string> { "O", "F" }*/
+                new List<string> { "A", "B", },
+                new List<string> { "C", "D" },
+                new List<string> { "B", "C", "O"},
 
             };
     protected override async Task OnInitializedAsync()
     {
         bool Succes = false;
-        var Output = "F";
-        var Input = new List<string> {"A"};
+        var Output = "D";
+        var Input = new List<string> {"A","O"};
         HashSet<string> HSInput = new HashSet<string>(Input);
         // Input required units
         HashSet<string> requiredUnits = new HashSet<string> {Output};
@@ -51,11 +57,9 @@
         var matchingGroups = unitGroups
             .Where(group => new HashSet<string>(group).IsSubsetOf(requiredUnits) && new HashSet<string>(group).Contains(Output))
             .ToList();
-        p1String = "Second"; 
         // Print results
         if (matchingGroups.Count > 0)
         {
-            p2String = "Yuh";
             foreach (var group in matchingGroups)
             {
                 p3String = $"{string.Join(", ", group)}";
@@ -63,11 +67,20 @@
         }
         else
         {
-            List<List<string>> AlreadyFound = new List<List<string>>();
-            Succes = Search(Output, HSInput, AlreadyFound);
+            List<List<string>> AlreadyFound = new List<List<string>>(); //List of already found equations to avoid loops
+            List<List<string>> FinalEquations = new List<List<string>>(); //List of final equations that are shown to the user
+            Succes = Search(Output, HSInput, AlreadyFound, FinalEquations); //searches for the output
+            
+            //Prints all the final equations:
+            FinalEquations.AddRange(AlreadyFound);
+            List<string> mergedFinalEquations = FinalEquations.Select(sublist => string.Join(",", sublist)).ToList();
+            List<string> UniqueFinalEquations = mergedFinalEquations.Distinct().ToList();
+            p8String = $"{string.Join("; ", UniqueFinalEquations)}";
+
             if (Succes == true)
             {
-                //p10String = "Succes";
+                p10String = "Succes";
+
             }
             else
             {
@@ -77,9 +90,9 @@
         }
 
     }
-    private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound)
+    //The search method
+    private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations)
     {
-        p2String = "Level 2";
         //Creates a list of equations containing the output and not containing any already found equations
         List<List<string>> groupsWithOutput = unitGroups
         .Where(group => new HashSet<string>(group).Contains(Output))
@@ -142,19 +155,20 @@
         }
         if (matchingGroups2.Count > 0)
         {
-            p5String = "lets goo";
-            p6String = $"{string.Join(", ", matchingGroups2[0])}" + "6";
-            p7String = $"{string.Join(", ", matchingGroups2[1])}" + "7";
+            //Adds all the found matching equations to the final equations list
+            foreach (var group in matchingGroups2)
+            {
+                FinalEquations.Add(group);
+            }
             return true;
         }
         else if (matchingGroups3.Count > 0)
         {
-            p10String = "lol";
-            p6String = $"{string.Join(", ", matchingGroups3[0])}";
-            p7String = $"{string.Join(", ", matchingGroups3[1])}";
-            p8String = $"{string.Join(", ", matchingGroups3[2])}";
-            p9String = $"{string.Join(", ", matchingGroups3[3])}";
-            p5String = $"{string.Join(", ", matchingGroups3[4])}";
+            //Adds all the found matching equations to the final equations list
+            foreach (var group in matchingGroups3)
+            {
+                FinalEquations.Add(group);
+            }
             return true;
 
         }
@@ -162,7 +176,7 @@
         {
                 for (int i = 0; i < groupsWithOutput.Count; i++)
                 {
-                    bool idk = true;
+                    bool allVariablesFound = true;
                     //Creates a hashset of all the missing variables
                     HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
                     HSMissingVariables.Remove(Output);
@@ -173,26 +187,19 @@
                     //searches with the same method to try to find the remaining equations, and leaves out the already found equation. 
                     foreach (string variable in HSMissingVariables)
                     {
-                        if(Search(variable, HSInput, AlreadyFound) != true)
+                    if (Search(variable, HSInput, AlreadyFound, FinalEquations) != true)
                         {
-                            idk = false;
+                            //Clears the list of already found equations and final equations, becuase all variables could not be found
+                            allVariablesFound = false;
                             AlreadyFound.Clear();
-                            //AlreadyFound.Remove(groupsWithOutput[i]);
+                            FinalEquations.Clear();
                             break;
                         }
                     }
-                    if (idk == true)
+                    //returns a succes if all variables to an equation with output was found
+                    if (allVariablesFound == true)
                     {
-                        HashSet<string> mergedAlreadyFound = AlreadyFound.SelectMany(set => set).ToHashSet();
-                        p8String = $"{string.Join(", ", mergedAlreadyFound)}" + "8";
-                        p8String = $"{string.Join(", ", AlreadyFound[0])}" + "9";
-                        p9String = $"{string.Join(", ", AlreadyFound[1])}"+ "9";
-                        //p10String = $"{string.Join(", ", AlreadyFound[2])}";
                         return true;
-                    }
-                    else
-                    {
-                        AlreadyFound.Clear();
                     }
                 }
             return false;
