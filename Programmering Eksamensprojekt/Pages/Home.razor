@@ -41,8 +41,9 @@
             var parsedData = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
             if (parsedData != null && parsedData.ContainsKey("Formler"))
             {
-                var formulasJson = parsedData["Formler"].ToString();
-                var formulas = JsonSerializer.Deserialize<Dictionary<string, List<int>>>(formulasJson);
+                var formulasJsonElement = (JsonElement)parsedData["Formler"];
+                var formulas = JsonSerializer.Deserialize<Dictionary<string, List<int>>>(formulasJsonElement.GetRawText());
+                ;
                 if (formulas != null)
                 {
                     unitGroups = formulas.Values.Select(list => list.Select(i => i.ToString()).ToList()).ToList();
@@ -61,11 +62,13 @@
         }
 
         bool Succes = false;
-        var Output = "5";
-        var Input = new List<string> { "2", "3","4" };
+        // input required units
+        var Output = "11";
+        var Input = new List<string> { "2", "1", "7", "8", };
         HashSet<string> HSInput = new HashSet<string>(Input);
         HashSet<string> requiredUnits = new HashSet<string> { Output };
         requiredUnits.UnionWith(Input);
+        // Find matching unit list
         var matchingGroups = unitGroups
             .Where(group => new HashSet<string>(group).IsSubsetOf(requiredUnits) && new HashSet<string>(group).Contains(Output))
             .ToList();
@@ -82,6 +85,7 @@
             List<List<string>> AlreadyFound = new List<List<string>>();
             List<List<string>> FinalEquations = new List<List<string>>();
             Succes = Search(Output, HSInput, AlreadyFound, FinalEquations);
+            //Prints all the final equations:
             FinalEquations.AddRange(AlreadyFound);
             List<string> mergedFinalEquations = FinalEquations.Select(sublist => string.Join(",", sublist)).ToList();
             List<string> UniqueFinalEquations = mergedFinalEquations.Distinct().ToList();
@@ -89,7 +93,7 @@
             p10String = Succes ? "Succes" : "Fail";
         }
     }
-
+    //The search method
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations)
     {
         List<List<string>> groupsWithOutput = unitGroups
@@ -102,6 +106,7 @@
         List<List<string>> matchingGroups2 = new List<List<string>>();
         List<List<string>> matchingGroups3 = new List<List<string>>();
 
+        //Creates a hashset of all the missing variables
         for (int i = 0; i < groupsWithOutput.Count; i++)
         {
             HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
@@ -109,6 +114,7 @@
             HSMissingVariables.UnionWith(HSInput);
             HSMissingVariables.ExceptWith(HSInput);
 
+            //Checks if any equation from the list contains the missing variables and does not contain any new unknown variables
             for (int j = 0; j < unitGroups.Count; j++)
             {
                 if (!groupsWithOutput[i].SequenceEqual(unitGroups[j]))
@@ -119,16 +125,19 @@
                         HSunitGroups.ExceptWith(HSMissingVariables);
                         if (HSInput.IsSupersetOf(HSunitGroups))
                         {
+                            //Adds the two equations needed to a list
                             matchingGroups2.Add(unitGroups[j]);
                             matchingGroups2.Add(groupsWithOutput[i]);
                         }
                     }
                     else if (HSunitGroups.Overlaps(HSMissingVariables) && HSunitGroups.Count(HSMissingVariables.Contains) == 1)
+                    //Adds alle equations with a missing variable, where the rest of the variables are known, to a list.
                     {
                         HSunitGroups.ExceptWith(HSMissingVariables);
                         if (HSInput.IsSupersetOf(HSunitGroups))
                         {
                             matchingGroups3.Add(unitGroups[j]);
+                            
                         }
                     }
                 }
@@ -144,6 +153,7 @@
             }
         }
         if (matchingGroups2.Count > 0)
+        //Adds all the found matching equations to the final equations list
         {
             foreach (var group in matchingGroups2)
             {
@@ -153,6 +163,7 @@
         }
         else if (matchingGroups3.Count > 0)
         {
+            //Adds all the found matching equations to the final equations list
             foreach (var group in matchingGroups3)
             {
                 FinalEquations.Add(group);
@@ -164,6 +175,7 @@
             for (int i = 0; i < groupsWithOutput.Count; i++)
             {
                 bool allVariablesFound = true;
+                //Creates a hashset of all the missing variables
                 HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
                 HSMissingVariables.Remove(Output);
                 HSMissingVariables.UnionWith(HSInput);
@@ -171,6 +183,7 @@
                 AlreadyFound.Add(groupsWithOutput[i]);
                 foreach (string variable in HSMissingVariables)
                 {
+                    //searches with the same method to try to find the remaining equations, and leaves out the already found equation.
                     if (!Search(variable, HSInput, AlreadyFound, FinalEquations))
                     {
                         allVariablesFound = false;
@@ -182,7 +195,7 @@
                 if (allVariablesFound) return true;
             }
             return false;
-        }
+        } //returns a succes if all variables to an equation with output was found
 
     }
 }

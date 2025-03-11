@@ -4,11 +4,22 @@
     "Rumfang": 2,
     "Densitet": 3,
     "Tyngdeacceleration": 4,
-    "Tyngdekraft": 5
+    "Tyngdekraft": 5,
+    "Hastighed": 6,
+    "Tid": 7,
+    "Strækning": 8,
+    "Arbejde": 9,
+    "Kraft": 10,
+    "Kinetiskenergi": 11
+
   },
   "Formler": {
     "mvp": [ 1, 2, 3 ],
-    "Ftmg": [ 1, 4, 5 ]
+    "Ftmg": [ 1, 4, 5 ],
+    "vst": [ 6, 7, 8 ],
+    "AFs": [ 9, 10, 8 ],
+    "EkA": [ 11, 9 ],
+    "Ekvm": [11, 6, 1]
   }
 }
 
