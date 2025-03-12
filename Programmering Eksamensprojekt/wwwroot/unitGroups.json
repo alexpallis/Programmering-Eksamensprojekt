@@ -10,7 +10,8 @@
     "Strækning": 8,
     "Arbejde": 9,
     "Kraft": 10,
-    "Kinetiskenergi": 11
+    "Kinetiskenergi": 11,
+    "Acceleration":  12
 
   },
   "Formler": {
@@ -19,7 +20,8 @@
     "vst": [ 6, 7, 8 ],
     "AFs": [ 9, 10, 8 ],
     "EkA": [ 11, 9 ],
-    "Ekvm": [11, 6, 1]
+    "Ekvm": [ 11, 6, 1 ],
+    "avt": [12, 6, 7]
   }
 }
 
