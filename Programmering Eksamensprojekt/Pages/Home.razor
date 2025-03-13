@@ -88,6 +88,7 @@
             foreach (var group in matchingGroups)
             {
                 p3String = $"{string.Join(", ", group)}";
+                p10String = "Succes";
             }
         }
         else
@@ -99,8 +100,9 @@
             FinalEquations.AddRange(AlreadyFound);
             List<string> mergedFinalEquations = FinalEquations.Select(sublist => string.Join(",", sublist)).ToList();
             List<string> UniqueFinalEquations = mergedFinalEquations.Distinct().ToList();
-            p8String = $"{string.Join("; ", UniqueFinalEquations)}";
+            //p8String = $"{string.Join("; ", UniqueFinalEquations)}";
             p10String = Succes ? "Succes" : "Fail";
+            p8String = Succes ? $"{string.Join("; ", UniqueFinalEquations)}" : "";
         }
     }
     //The search method
