@@ -95,10 +95,10 @@
 
         if (matchingFormulas.Count > 0)
         {
-            p3String = string.Join(", ", matchingFormulas);
+            p3String = (MarkupString)string.Join(" ", matchingFormulas.Select(f => $"<p>\\( {f} \\)</p>"));
             p10String = "Succes";
         }
-        else;
+        else
         {
             List<List<string>> AlreadyFound = new List<List<string>>();
             List<List<string>> FinalEquations = new List<List<string>>();
@@ -111,7 +111,7 @@
                 .ToList();
 
             p10String = Succes ? "Succes" : "Fail";
-            p8String = Succes ? string.Join(", ", formulaNames) : "";
+            p8String = Succes ? string.Join(" ", formulaNames.Select(f => $"<p>\( {f} \)</p>")) : "";
         }
     }
     //The search method
