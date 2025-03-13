@@ -43,6 +43,8 @@
 
     private string Output;
     private string Input;
+    private Dictionary<string, List<string>> formulaDictionary = new();
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -53,10 +55,16 @@
             {
                 var formulasJsonElement = (JsonElement)parsedData["Formler"];
                 var formulas = JsonSerializer.Deserialize<Dictionary<string, List<int>>>(formulasJsonElement.GetRawText());
-                ;
+
                 if (formulas != null)
                 {
-                    unitGroups = formulas.Values.Select(list => list.Select(i => i.ToString()).ToList()).ToList();
+                    // Convert number lists to string-based dictionary
+                    formulaDictionary = formulas.ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value.Select(i => i.ToString()).ToList()
+                    );
+
+                    unitGroups = formulaDictionary.Values.ToList(); // Keep the existing unitGroups format
                 }
             }
             pString = "JSON virker hype.";
@@ -75,36 +83,35 @@
     private void onSearchButtonClicked()
     {
         bool Succes = false;
-        // input requiredunits
         List<string> InputList = Input.Split(',').ToList();
         HashSet<string> HSInput = new HashSet<string>(InputList);
-        HashSet<string> requiredUnits = new HashSet<string> {Output};
+        HashSet<string> requiredUnits = new HashSet<string> { Output };
         requiredUnits.UnionWith(InputList);
-        // Find matching unit list
-        var matchingGroups = unitGroups
-            .Where(group => new HashSet<string>(group).IsSubsetOf(requiredUnits) && new HashSet<string>(group).Contains(Output))
+
+        var matchingFormulas = formulaDictionary
+            .Where(kvp => new HashSet<string>(kvp.Value).IsSubsetOf(requiredUnits) && kvp.Value.Contains(Output))
+            .Select(kvp => kvp.Key)
             .ToList();
 
-        if (matchingGroups.Count > 0)
+        if (matchingFormulas.Count > 0)
         {
-            foreach (var group in matchingGroups)
-            {
-                p3String = $"{string.Join(", ", group)}";
-                p10String = "Succes";
-            }
+            p3String = string.Join(", ", matchingFormulas);
+            p10String = "Succes";
         }
-        else
+        else;
         {
             List<List<string>> AlreadyFound = new List<List<string>>();
             List<List<string>> FinalEquations = new List<List<string>>();
             Succes = Search(Output, HSInput, AlreadyFound, FinalEquations);
-            //Prints all the final equations:
-            FinalEquations.AddRange(AlreadyFound);
-            List<string> mergedFinalEquations = FinalEquations.Select(sublist => string.Join(",", sublist)).ToList();
-            List<string> UniqueFinalEquations = mergedFinalEquations.Distinct().ToList();
-            //p8String = $"{string.Join("; ", UniqueFinalEquations)}";
+
+            var formulaNames = formulaDictionary
+                .Where(kvp => FinalEquations.Any(eq => eq.SequenceEqual(kvp.Value)))
+                .Select(kvp => kvp.Key)
+                .Distinct()
+                .ToList();
+
             p10String = Succes ? "Succes" : "Fail";
-            p8String = Succes ? $"{string.Join("; ", UniqueFinalEquations)}" : "";
+            p8String = Succes ? string.Join(", ", formulaNames) : "";
         }
     }
     //The search method
