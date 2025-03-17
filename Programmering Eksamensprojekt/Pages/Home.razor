@@ -2,14 +2,18 @@
 @using System.Text.Json
 @using System.IO
 @using Microsoft.AspNetCore.Components
+@using Programmering_Eksamensprojekt.Services
 @inject HttpClient Http
 
 <PageTitle>Home</PageTitle>
 
 <script type="text/javascript" async src="MathJax-master/MathJax-master/es5/tex-mml-chtml.js"></script>
+<script src="/Rerender.js"></script>
+
+@inject MathJaxRenderer mathJaxRenderer;
+@* @inject IJSRuntime JSRuntime *@
 
 <h1>Skriv hvad du vil finde bro</h1>
-<p>Euler’s formula: \( e^{i\pi} + 1 = 0 \)</p>
 <p>Skriv dit output her: (eksempel: 12)</p>
 <input id="inputField" type="text" @bind="Output"/>
 <p>Skriv dit input her: (eksempel: 6,7)</p>
@@ -47,6 +51,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        //p3String = "\\( e ^{ i\\pi}+1 = 0 \\)";
         try
         {
             var json = await Http.GetStringAsync("unitGroups.json");
@@ -80,7 +85,12 @@
         }
     }
 
-    private void onSearchButtonClicked()
+    private async Task CallMathJax()
+    {
+        await mathJaxRenderer.RenderMath(); ;
+    }
+
+    private async Task onSearchButtonClicked()
     {
         bool Succes = false;
         List<string> InputList = Input.Split(',').ToList();
@@ -95,7 +105,7 @@
 
         if (matchingFormulas.Count > 0)
         {
-            p3String = (MarkupString)string.Join(" ", matchingFormulas.Select(f => $"<p>\\( {f} \\)</p>"));
+            p3String = string.Join("", matchingFormulas.Select(f => "\\(" + $"{f}" + "\\)"));
             p10String = "Succes";
         }
         else
@@ -111,8 +121,12 @@
                 .ToList();
 
             p10String = Succes ? "Succes" : "Fail";
-            p8String = Succes ? string.Join(" ", formulaNames.Select(f => $"<p>\( {f} \)</p>")) : "";
+            p8String = Succes ? string.Join(" ", formulaNames.Select(f => "\\(" + $"{f}" + "\\)")) : "";
         }
+        //reloads the MathJax
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(10);
+        await CallMathJax();
     }
     //The search method
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations)
