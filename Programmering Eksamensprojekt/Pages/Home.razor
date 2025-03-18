@@ -8,7 +8,7 @@
 <PageTitle>Home</PageTitle>
 
 <script type="text/javascript" async src="MathJax-master/MathJax-master/es5/tex-mml-chtml.js"></script>
-<script src="/Rerender.js"></script>
+<script src="Rerender.js"></script>
 
 @inject MathJaxRenderer mathJaxRenderer;
 @* @inject IJSRuntime JSRuntime *@
@@ -51,7 +51,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //p3String = "\\( e ^{ i\\pi}+1 = 0 \\)";
+        p2String = "\\( e ^{ i\\pi}+1 = 0 \\)";
         try
         {
             var json = await Http.GetStringAsync("unitGroups.json");
@@ -87,7 +87,10 @@
 
     private async Task CallMathJax()
     {
-        await mathJaxRenderer.RenderMath(); ;
+        if (mathJaxRenderer != null)
+        {
+            await mathJaxRenderer.RenderMath();
+        }
     }
 
     private async Task onSearchButtonClicked()
@@ -125,7 +128,7 @@
         }
         //reloads the MathJax
         await InvokeAsync(StateHasChanged);
-        await Task.Delay(10);
+        await Task.Delay(100);
         await CallMathJax();
     }
     //The search method
