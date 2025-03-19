@@ -23,7 +23,9 @@
 <p>@pString</p>
 <p>@p1String</p>
 <p>@p2String</p>
-<p>@p3String</p>
+<div @key="@p3String">
+    @p3String
+</div>
 <p>@p4String</p>
 <p>@p5String</p>
 <p>@p6String</p>
@@ -54,7 +56,7 @@
         p2String = "\\( e ^{ i\\pi}+1 = 0 \\)";
         try
         {
-            var json = await Http.GetStringAsync("unitGroups.json");
+            var json = await Http.GetStringAsync($"unitGroups.json?t={DateTime.UtcNow.Ticks}");
             var parsedData = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
             if (parsedData != null && parsedData.ContainsKey("Formler"))
             {

@@ -13,6 +13,9 @@
         public int Arbejde { get; set; }
         public int Kraft {  get; set; }
         public int Kinetiskenergi { get; set; }
+        public int Acceleration { get; set; }
+
+
     }
 
     public class Formler
@@ -23,6 +26,7 @@
         public List<int> AFs { get; set; }
         public List<int> EkA { get; set; }
         public List<int> Ekvm { get; set; }
+        public List<int> avt { get; set; }
 
     }
 
