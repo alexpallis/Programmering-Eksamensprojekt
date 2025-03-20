@@ -3,6 +3,7 @@
 @using System.IO
 @using Microsoft.AspNetCore.Components
 @using Programmering_Eksamensprojekt.Services
+@inject IJSRuntime JS
 @inject HttpClient Http
 
 <PageTitle>Home</PageTitle>
@@ -11,13 +12,24 @@
 <script src="Rerender.js"></script>
 
 @inject MathJaxRenderer mathJaxRenderer;
-@* @inject IJSRuntime JSRuntime *@
 
 <h1>Skriv hvad du vil finde bro</h1>
-<p>Skriv dit output her: (eksempel: 12)</p>
-<input id="inputField" type="text" @bind="Output"/>
-<p>Skriv dit input her: (eksempel: 6,7)</p>
-<input id="inputField" type="text" @bind="Input" />
+<p>Skriv dit output her:</p>
+<input id="outputField" type="text" @bind="Output" @oninput="UpdateSuggestions" list="suggestionsList" />
+<datalist id="suggestionsList">
+    @foreach (var suggestion in Suggestions)
+    {
+        <option value="@suggestion"></option>
+    }
+</datalist>
+<p>Skriv dit input her:</p>
+<input id="inputField" type="text" @bind="Input" @oninput="UpdateInputSuggestions" list="inputSuggestionsList" />
+<datalist id="inputSuggestionsList">
+    @foreach (var suggestion in InputSuggestions)
+    {
+        <option value="@suggestion"></option>
+    }
+</datalist>
 <button id="buttonSearch" @onclick="onSearchButtonClicked">Search</button>
 
 <p>@pString</p>
@@ -33,6 +45,7 @@
 </div>
 <p>@p9String</p>
 <p>@p10String</p>
+
 @code {
     string pString = "";
     string p1String = "";
@@ -46,10 +59,13 @@
     string p9String = "";
     string p10String = "";
     List<List<string>> unitGroups = new List<List<string>>();
+    List<string> Suggestions = new();
+    List<string> InputSuggestions = new();
 
     private string Output;
     private string Input;
     private Dictionary<string, List<string>> formulaDictionary = new();
+    private Dictionary<string, string> nameToNumber = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,28 +74,17 @@
         {
             var json = await Http.GetStringAsync($"unitGroups.json?t={DateTime.UtcNow.Ticks}");
             var parsedData = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-            if (parsedData != null && parsedData.ContainsKey("Formler"))
+            if (parsedData != null && parsedData.ContainsKey("Størrelse"))
             {
-                var formulasJsonElement = (JsonElement)parsedData["Formler"];
-                var formulas = JsonSerializer.Deserialize<Dictionary<string, List<int>>>(formulasJsonElement.GetRawText());
+                var sizeJsonElement = (JsonElement)parsedData["Størrelse"];
+                var sizeDict = JsonSerializer.Deserialize<Dictionary<string, int>>(sizeJsonElement.GetRawText());
 
-                if (formulas != null)
+                if (sizeDict != null)
                 {
-                    // Convert number lists to string-based dictionary
-                    formulaDictionary = formulas.ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value.Select(i => i.ToString()).ToList()
-                    );
-
-                    unitGroups = formulaDictionary.Values.ToList(); // Keep the existing unitGroups format
+                    nameToNumber = sizeDict.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString());
                 }
             }
             pString = "JSON virker hype.";
-        }
-
-        catch (JsonException jex)
-        {
-            pString = $"JSON virker ikke (mindre hype): {jex.Message}";
         }
         catch (Exception ex)
         {
@@ -87,31 +92,61 @@
         }
     }
 
-    private async Task CallMathJax()
+    private void UpdateSuggestions(ChangeEventArgs e)
     {
-        if (mathJaxRenderer != null)
+        var inputText = e.Value?.ToString() ?? "";
+        Suggestions = nameToNumber.Keys
+            .Where(name => name.Contains(inputText, StringComparison.OrdinalIgnoreCase))
+            .Take(5)
+            .ToList();
+    }
+
+    private void UpdateInputSuggestions(ChangeEventArgs e)
+    {
+        var inputText = e.Value?.ToString() ?? "";
+
+        // Split by commas and trim spaces
+        var inputParts = inputText.Split(',')
+                                  .Select(part => part.Trim())
+                                  .Where(part => !string.IsNullOrEmpty(part))
+                                  .ToList();
+
+        if (inputParts.Count > 0)
         {
-            await mathJaxRenderer.RenderMath();
+            // Get the last typed value for suggestions
+            var lastValue = inputParts.Last();
+
+            // Generate suggestions for the last value only
+            InputSuggestions = nameToNumber.Keys
+                .Where(name => name.Contains(lastValue, StringComparison.OrdinalIgnoreCase))
+                .Take(5)
+                .ToList();
         }
+        else
+        {
+            InputSuggestions.Clear();
+        }
+
+        // Force re-render to update the dropdown
+        StateHasChanged();
     }
 
     private async Task onSearchButtonClicked()
     {
-        bool Succes = false;
-        List<string> InputList = new List<string>();
-        if (Input != null)
+        if (nameToNumber.TryGetValue(Output, out string outputNumber))
         {
-            InputList = Input.Split(',').ToList();
+            Output = outputNumber;
         }
+
+        bool Success = false;
+        List<string> InputList = Input?.Split(',').Select(i => i.Trim()).ToList() ?? new();
         HashSet<string> HSInput = new HashSet<string>(InputList);
         HashSet<string> requiredUnits = new HashSet<string> { Output };
         requiredUnits.UnionWith(InputList);
 
-
-
-        List<List<string>> AlreadyFound = new List<List<string>>();
-        List<List<string>> FinalEquations = new List<List<string>>();
-        Succes = Search(Output, HSInput, AlreadyFound, FinalEquations, requiredUnits);
+        List<List<string>> AlreadyFound = new();
+        List<List<string>> FinalEquations = new();
+        Success = Search(Output, HSInput, AlreadyFound, FinalEquations, requiredUnits);
 
         var formulaNames = formulaDictionary
             .Where(kvp => FinalEquations.Any(eq => eq.SequenceEqual(kvp.Value)))
@@ -119,14 +154,19 @@
             .Distinct()
             .ToList();
 
-        p10String = Succes ? "Succes" : "Fail";
-        p8String = Succes ? string.Join(" ", formulaNames.Select(f => "\\(" + $"{f}" + "\\)")) : "";
+        p10String = Success ? "Succes" : "Fail";
+        p8String = Success ? string.Join(" ", formulaNames.Select(f => "\\(" + $"{f}" + "\\)")) : "";
 
-        //reloads the MathJax
         await InvokeAsync(StateHasChanged);
         await Task.Delay(100);
         await CallMathJax();
     }
+
+    private async Task CallMathJax()
+    {
+        await JS.InvokeVoidAsync("CallMathJax");
+    }
+
     //The search method
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations, HashSet<string> requiredUnits)
     {
