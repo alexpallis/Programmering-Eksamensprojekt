@@ -11,17 +11,24 @@
     "Arbejde": 9,
     "Kraft": 10,
     "Kinetisk energi": 11,
-    "Acceleration":  12,
+    "Acceleration": 12,
     "Amplitude": 13,
     "Vinkelhastighed": 14,
     "Svingningstid": 15,
     "Frekvens": 16,
     "Fjederkonstant": 17,
+    "impuls": 18,
+    "Resulterende kraft": 19,
+    "KraftMoment": 20,
     "Feltkraft": 21,
     "Vinkel": 22,
-    "Potentiel energi": 23
+    "Potentiel energi": 23,
+    "Intertimoment":  24
+
+
   },
   "Formler": {
+
     "s=v\\cdot t": [ 6, 7, 8 ],
     "v=a\\cdot t": [ 6, 7, 12 ],
     "s=A\\cdot\\sin(\\omega\\cdot t)": [ 7, 8, 13, 14 ],
@@ -36,12 +43,16 @@
     "F=G\\cdot\\frac{m\\cdot M}{r^2}": [ 5, 1, 8 ],
     "A_{Felt}=F_{Felt}\\cdot r\\cdot\\cos(\\alpha)": [ 9, 21, 22, 8 ],
     "E_{pot}=-G\\cdot\\frac{m\\cdot M}{r}": [ 23, 1, 8 ],
-    "A=B": [ 23 ],
+    "p=m\\cdot v": [ 18, 6, 1 ],
+    "F_{res} = \\frac{\\Delta p}{\\Delta t}": [ 19, 18, 7 ],
+    "v=u\\cdot\\ln\\frac{m_0}{m}": [ 1, 6 ],
+    "M=r\\cdot F":  [20, 8, 10],
+    "I=\\sum m_i\\cdot r_i^2":  [ 24, 1, 8],
     "m=V\\cdot\\rho": [ 1, 2, 3 ],
     "Ftmg": [ 1, 4, 5 ],
     "AFs": [ 8, 9, 10 ],
-    "EkA": [ 9, 11 ],
-    "E_k = 1/2*m*v^2": [ 1, 6, 11 ]
+    "E_k=A": [ 9, 11 ],
+    "E_k = \\frac{1}{2}\\cdot m\\cdot v^2": [ 1, 6, 11 ]
   }
 }
 
