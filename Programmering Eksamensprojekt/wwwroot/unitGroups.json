@@ -1,7 +1,7 @@
 {
   "Størrelse": {
     "Masse": 1,
-    "Rumfang": 2,
+    "Volumen": 2,
     "Densitet": 3,
     "Tyngdeacceleration": 4,
     "Tyngdekraft": 5,
@@ -40,25 +40,39 @@
     "Effektfaktor": 38,
     "Coulombkraft": 39,
     "Ladning": 40,
-    "Feltstyrke (elektrisk)": 41,
+    "Elektrisk feltstyrke": 41,
     "Potentiale": 42,
     "Permittivitet": 43,
-    "Permittivitet (relativ)": 44,
-    "Flux (elektrisk)": 45,
+    "Relativ Permittivitet": 44,
+    "Elektrisk flux": 45,
     "Areal": 46,
     "Kapacitans": 47,
     "Spænding": 48,
-    "Feltstyrke (magnetisk)": 49,
+    "Magnetisk feltstyrke": 49,
     "Strømstyrke": 50,
     "Antal": 51,
-    "Kraft (magnetisk)": 52,
-    "Kraft (Lorentz)": 53,
+    "Magnetisk kraft": 52,
+    "Lorentz kraft": 53,
     "Modstand": 54,
-    "Flux (magnetisk)": 55,
+    "Magnetisk Flux": 55,
     "Induktans": 56,
     "Halveringstid": 57,
-    "Energi (gab)": 58,
-    "Strømforstærkning": 59
+    "Energigab": 58,
+    "Strømforstærkning": 59,
+    "Latent varme": 60,
+    "Effekt": 61,
+    "Energi": 62,
+    "Varmestrøm": 63,
+    "U-værdi": 64,
+    "Varmekonduktivitet": 65,
+    "Flux": 66,
+    "Opdrift": 67,
+    "Molarmasse": 68,
+    "Relativ fugtighed": 69,
+    "Gnidningskraft": 70,
+    "Normalkraft": 71,
+    "Gnidningskoefficient": 72,
+    "Luftmodstand":  73
 
 
 
@@ -161,28 +175,42 @@
     "\\text{LC:  } f_0=\\frac{1}{2\\pi}\\cdot\\sqrt{\\frac{1}{L\\cdot C}}": [ 47, 16, 56 ],
     "E_{gab}\\leq\\frac{3}{2}\\cdot k_B\\cdot T": [ 58, 33 ],
     "\\beta=\\frac{I_c}{I_b}": [ 59, 50 ],
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     "m=V\\cdot\\rho": [ 1, 2, 3 ],
-    "Ftmg": [ 1, 4, 5 ],
-    "AFs": [ 8, 9, 10 ],
+    "F_t=m\\cdot g": [ 1, 4, 5 ],
+    "A=F\\cdot s": [ 8, 9, 10 ],
     "E_k=A": [ 9, 11 ],
-    "E_k = \\frac{1}{2}\\cdot m\\cdot v^2": [ 1, 6, 11 ]
+    "E_k = \\frac{1}{2}\\cdot m\\cdot v^2": [ 1, 6, 11 ],
+    "E_{pot}=m\\cdot g\\cdot h": [ 23, 1, 8 ],
+    "Q=m\\cdot L": [ 1, 60, 29 ],
+    "P\\cdot t = E": [ 61, 7, 62 ],
+    "\\Phi=U\\cdot A\\cdot\\Delta T": [ 63, 64, 46, 33 ],
+    "\\frac{1}{U}=\\frac{1}{U_1}+\\frac{1}{U_2}": [ 64 ],
+    "U=\\frac{\\lambda}{L}": [ 64, 65, 8 ],
+    "\\Phi=A\\cdot\\sigma\\cdot T^4": [ 46, 33, 66 ],
+    "P=\\frac{F}{A}": [ 31, 10, 46 ],
+    "p=\\rho\\cdot g\\cdoth + p_0": [ 31, 3, 8 ],
+    "F_{op}=\\rho\\cdot V\\cdot g": [ 67, 3, 2 ],
+    "n=\\frac{N}{N_A}": [ 32, 51 ],
+    "m=n\\cdot M": [ 1, 32, 68 ],
+    "p\\cdot V=n\\cdot R\\cdot T": [ 31, 2, 33, 32 ],
+    "p_{tot}=p_1+p_2": [ 31 ],
+    "RF=\\frac{p_u}{p_m}": [ 31, 69 ],
+    "\\Delta s=\\frac{1}{2}\\cdot a\\cdot t^2+v_0\\cdot t": [ 8, 6, 7, 12 ],
+    "\\Delta s=\\frac{v^2-v^2_0}{2a}": [ 6, 8, 12 ],
+    "\\vec{F_{res}}=m\\cdot\\vec{a}": [ 19, 12, 1 ],
+    "F=-k\\cdot x": [ 10, 17, 8 ],
+    "F_g=\\mu\\cdot F_N": [ 7, 71, 72 ],
+    "F_g\\leq\\mu_s\\cdot F_N": [ 7, 71, 72 ],
+    "F_w=\\frac{1}{2}\\cdot c_w\\cdot A\\cdot\\rho\\cdot v^2": [73, 46, 3, 6]
+
+
+
+
+
+
+
+
+
   }
 }
 
