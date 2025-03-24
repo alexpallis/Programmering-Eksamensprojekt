@@ -22,14 +22,24 @@
         <option value="@suggestion"></option>
     }
 </datalist>
-<p>Skriv dit input her:</p>
-<input id="inputField" type="text" @bind="Input" @oninput="UpdateInputSuggestions" list="inputSuggestionsList" />
+
+<p>Vælg dine størrelser en ad gangen:</p>
+<input id="inputField" type="text" @bind-value="CurrentInput" @oninput="UpdateInputSuggestions" list="inputSuggestionsList" />
 <datalist id="inputSuggestionsList">
     @foreach (var suggestion in InputSuggestions)
     {
         <option value="@suggestion"></option>
     }
 </datalist>
+<button @onclick="AddSize">Tilføj Størrelse</button>
+
+<ul>
+    @foreach (var size in SelectedSizes)
+    {
+        <li>@size <button @onclick="() => RemoveSize(size)">X</button></li>
+    }
+</ul>
+
 <button id="buttonSearch" @onclick="onSearchButtonClicked">Search</button>
 
 <p>@pString</p>
@@ -47,6 +57,7 @@
 <p>@p10String</p>
 
 @code {
+    // Variables for dynamic content
     string pString = "";
     string p1String = "";
     string p2String = "";
@@ -58,22 +69,26 @@
     string p8String = "";
     string p9String = "";
     string p10String = "";
-    List<List<string>> unitGroups = new List<List<string>>();
+
+    // Data structures for calculations and UI interactions
+    List<List<string>> unitGroups = new();
     List<string> Suggestions = new();
     List<string> InputSuggestions = new();
+    Dictionary<string, string> nameToNumber = new();
 
+    // User inputs
     private string Output;
-    private string Input;
-    private Dictionary<string, List<string>> formulaDictionary = new();
-    private Dictionary<string, string> nameToNumber = new();
+    private string CurrentInput;
+    private List<string> SelectedSizes = new();
 
+    // Initialize component and fetch data
     protected override async Task OnInitializedAsync()
     {
-        p2String = "\\( e ^{ i\\pi}+1 = 0 \\)";
         try
         {
             var json = await Http.GetStringAsync($"unitGroups.json?t={DateTime.UtcNow.Ticks}");
             var parsedData = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+
             if (parsedData != null && parsedData.ContainsKey("Størrelse"))
             {
                 var sizeJsonElement = (JsonElement)parsedData["Størrelse"];
@@ -84,6 +99,22 @@
                     nameToNumber = sizeDict.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString());
                 }
             }
+
+            if (parsedData != null && parsedData.ContainsKey("unitGroups"))
+            {
+                var groupsJsonElement = (JsonElement)parsedData["unitGroups"];
+                var rawUnitGroups = JsonSerializer.Deserialize<List<List<string>>>(groupsJsonElement.GetRawText());
+
+                unitGroups = rawUnitGroups
+                    .Select(group => group
+                        .Select(item => nameToNumber.ContainsKey(item) ? nameToNumber[item] : item)
+                        .ToList())
+                    .ToList();
+            }
+
+            //p1String = "Loaded sizes: " + string.Join(", ", nameToNumber.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+            p9String = "Unit Groups (Raw): " + JsonSerializer.Serialize(unitGroups);
+            p9String = "Unit Groups: " + string.Join(" | ", unitGroups.Select(g => string.Join(", ", g)));
             pString = "JSON virker hype.";
         }
         catch (Exception ex)
@@ -92,6 +123,8 @@
         }
     }
 
+
+    // Update dropdown suggestions for output field
     private void UpdateSuggestions(ChangeEventArgs e)
     {
         var inputText = e.Value?.ToString() ?? "";
@@ -101,61 +134,54 @@
             .ToList();
     }
 
+    // Update dropdown suggestions for input field
     private void UpdateInputSuggestions(ChangeEventArgs e)
     {
         var inputText = e.Value?.ToString() ?? "";
-
-        // Split by commas and trim spaces
-        var inputParts = inputText.Split(',')
-                                  .Select(part => part.Trim())
-                                  .Where(part => !string.IsNullOrEmpty(part))
-                                  .ToList();
-
-        if (inputParts.Count > 0)
-        {
-            // Get the last typed value for suggestions
-            var lastValue = inputParts.Last();
-
-            // Generate suggestions for the last value only
-            InputSuggestions = nameToNumber.Keys
-                .Where(name => name.Contains(lastValue, StringComparison.OrdinalIgnoreCase))
-                .Take(5)
-                .ToList();
-        }
-        else
-        {
-            InputSuggestions.Clear();
-        }
-
-        // Force re-render to update the dropdown
-        StateHasChanged();
+        InputSuggestions = nameToNumber.Keys
+            .Where(name => name.Contains(inputText, StringComparison.OrdinalIgnoreCase))
+            .Take(5)
+            .ToList();
+        InvokeAsync(StateHasChanged);
     }
 
+    // Add selected size to list
+    private void AddSize()
+    {
+        if (!string.IsNullOrWhiteSpace(CurrentInput) && !SelectedSizes.Contains(CurrentInput))
+        {
+            SelectedSizes.Add(CurrentInput);
+            CurrentInput = ""; // Clear input field
+        }
+    }
+
+    // Remove a size from the list
+    private void RemoveSize(string size)
+    {
+        SelectedSizes.Remove(size);
+    }
+
+    // Search button logic
     private async Task onSearchButtonClicked()
     {
-        if (nameToNumber.TryGetValue(Output, out string outputNumber))
-        {
-            Output = outputNumber;
-        }
+
+        string outputNumber = nameToNumber.TryGetValue(Output, out string tempOutput) ? tempOutput : Output;
+        List<string> inputNumbers = SelectedSizes
+            .Select(i => nameToNumber.TryGetValue(i, out string num) ? num : i)
+            .ToList();
+      
 
         bool Success = false;
-        List<string> InputList = Input?.Split(',').Select(i => i.Trim()).ToList() ?? new();
-        HashSet<string> HSInput = new HashSet<string>(InputList);
-        HashSet<string> requiredUnits = new HashSet<string> { Output };
-        requiredUnits.UnionWith(InputList);
+        HashSet<string> HSInput = new(inputNumbers);
+        HashSet<string> requiredUnits = new() { outputNumber };
+        requiredUnits.UnionWith(inputNumbers);
 
         List<List<string>> AlreadyFound = new();
         List<List<string>> FinalEquations = new();
-        Success = Search(Output, HSInput, AlreadyFound, FinalEquations, requiredUnits);
-
-        var formulaNames = formulaDictionary
-            .Where(kvp => FinalEquations.Any(eq => eq.SequenceEqual(kvp.Value)))
-            .Select(kvp => kvp.Key)
-            .Distinct()
-            .ToList();
+        Success = Search(outputNumber, HSInput, AlreadyFound, FinalEquations, requiredUnits);
 
         p10String = Success ? "Succes" : "Fail";
-        p8String = Success ? string.Join(" ", formulaNames.Select(f => "\\(" + $"{f}" + "\\)")) : "";
+        p8String = Success ? string.Join(" ", FinalEquations.Select(eq => "\\(" + $"{string.Join(", ", eq)}" + "\\)")) : "";
 
         await InvokeAsync(StateHasChanged);
         await Task.Delay(100);
@@ -167,37 +193,38 @@
         await JS.InvokeVoidAsync("CallMathJax");
     }
 
-    //The search method
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations, HashSet<string> requiredUnits)
     {
+        p2String = $"Searching for: {Output}, Given Inputs: {string.Join(", ", HSInput)}";
+
         List<List<string>> matchingFormulas = unitGroups
             .Where(kvp => new HashSet<string>(kvp).IsSubsetOf(requiredUnits) && kvp.Contains(Output))
             .ToList();
 
         if (matchingFormulas.Count > 0)
         {
-            //p3String = string.Join("", matchingFormulas.Select(f => "\\(" + $"{f}" + "\\)" + "   "));
-            //p10String = "Succes";
             foreach (var List in matchingFormulas)
             {
                 FinalEquations.Add(List);
             }
+            p10String = "Success";
             return true;
         }
 
-
-
         List<List<string>> groupsWithOutput = unitGroups
-        .Where(group => new HashSet<string>(group).Contains(Output))
-        .Except(AlreadyFound)
-        .ToList();
-        unitGroups.Except(AlreadyFound);
-        if (groupsWithOutput.Count == 0) return false;
+            .Where(group => new HashSet<string>(group).Contains(Output))
+            .Except(AlreadyFound)
+            .ToList();
+
+        if (groupsWithOutput.Count == 0)
+        {
+            p10String = "Fail: Ingen formler fundet.";
+            return false;
+        }
 
         List<List<string>> matchingGroups2 = new List<List<string>>();
         List<List<string>> matchingGroups3 = new List<List<string>>();
 
-        //Creates a hashset of all the missing variables
         for (int i = 0; i < groupsWithOutput.Count; i++)
         {
             HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
@@ -205,7 +232,6 @@
             HSMissingVariables.UnionWith(HSInput);
             HSMissingVariables.ExceptWith(HSInput);
 
-            //Checks if any equation from the list contains the missing variables and does not contain any new unknown variables
             for (int j = 0; j < unitGroups.Count; j++)
             {
                 if (!groupsWithOutput[i].SequenceEqual(unitGroups[j]))
@@ -216,19 +242,16 @@
                         HSunitGroups.ExceptWith(HSMissingVariables);
                         if (HSInput.IsSupersetOf(HSunitGroups))
                         {
-                            //Adds the two equations needed to a list
                             matchingGroups2.Add(unitGroups[j]);
                             matchingGroups2.Add(groupsWithOutput[i]);
                         }
                     }
                     else if (HSunitGroups.Overlaps(HSMissingVariables) && HSunitGroups.Count(HSMissingVariables.Contains) == 1)
-                    //Adds alle equations with a missing variable, where the rest of the variables are known, to a list.
                     {
                         HSunitGroups.ExceptWith(HSMissingVariables);
                         if (HSInput.IsSupersetOf(HSunitGroups))
                         {
                             matchingGroups3.Add(unitGroups[j]);
-
                         }
                     }
                 }
@@ -243,55 +266,55 @@
                 matchingGroups3.Clear();
             }
         }
+
         if (matchingGroups2.Count > 0)
-        //Adds all the found matching equations to the final equations list
         {
             foreach (var group in matchingGroups2)
             {
                 FinalEquations.Add(group);
             }
+            p10String = "Success";
             return true;
         }
         else if (matchingGroups3.Count > 0)
         {
-            //Adds all the found matching equations to the final equations list
             foreach (var group in matchingGroups3)
             {
                 FinalEquations.Add(group);
             }
+            p10String = "Success";
             return true;
         }
         else
         {
-            p6String = "lol";
             for (int i = 0; i < groupsWithOutput.Count; i++)
             {
                 bool allVariablesFound = true;
-                //Creates a hashset of all the missing variables
                 HashSet<string> HSMissingVariables = new HashSet<string>(groupsWithOutput[i]);
                 HSMissingVariables.Remove(Output);
                 HSMissingVariables.UnionWith(HSInput);
                 HSMissingVariables.ExceptWith(HSInput);
                 AlreadyFound.Add(groupsWithOutput[i]);
+
                 foreach (string variable in HSMissingVariables)
                 {
-                    //searches with the same method to try to find the remaining equations, and leaves out the already found equation.
                     if (!Search(variable, HSInput, AlreadyFound, FinalEquations, requiredUnits))
                     {
                         allVariablesFound = false;
                         AlreadyFound.Remove(groupsWithOutput[i]);
-                        //FinalEquations.Clear();
                         break;
                     }
                 }
-                if (allVariablesFound) {
+                if (allVariablesFound)
+                {
                     FinalEquations.Add(groupsWithOutput[i]);
+                    p10String = "Success";
                     return true;
                 }
-                //returns a succes if all variables to an equation with output was found
             }
+            p10String = "Fail: Ingen formler fundet grundet inputs or some sh*t";
             return false;
-        } 
-
+        }
     }
+
 }
