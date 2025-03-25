@@ -7,7 +7,7 @@
     "Tyngdekraft": 5,
     "Hastighed": 6,
     "Tid": 7,
-    "Afstand": 8,
+    "Længde": 8,
     "Arbejde": 9,
     "Kraft": 10,
     "Kinetisk energi": 11,
@@ -72,7 +72,15 @@
     "Gnidningskraft": 70,
     "Normalkraft": 71,
     "Gnidningskoefficient": 72,
-    "Luftmodstand":  73
+    "Luftmodstand": 73,
+    "Rotationsenergi": 74,
+    "Mekanisk energi": 75,
+    "Elektrisk energi": 76,
+    "Resistivitet": 77,
+    "resistanstemperaturkoefficient": 78,
+    "Bølgelængde": 79,
+    "Brydningsindeks": 80,
+    "Brydningsforhold":  81
 
 
 
@@ -102,7 +110,7 @@
     "v=u\\cdot\\ln\\frac{m_0}{m}": [ 1, 6 ],
     "\\vec{M}=\\vec{r}\\times \\vec{F}": [ 20, 8, 10 ],
     "I=\\sum m_i\\cdot r_i^2": [ 24, 1, 8 ],
-    "E_{rot}=\\frac{1}{2}\\cdot I\\cdot\\omega^2": [ 11, 14, 24 ],
+    "E_{rot}=\\frac{1}{2}\\cdot I\\cdot\\omega^2": [ 74, 14, 24 ],
     "I=I_0+m\\cdot d^2": [ 24, 1, 8 ],
     "\\vec{L}=\\vec{r}\\times \\vec{p}": [ 25, 8, 18 ],
     "\\vec{M}=\\frac{\\Delta \\vec{L}}{\\Delta t}": [ 20, 25, 7 ],
@@ -178,7 +186,7 @@
     "m=V\\cdot\\rho": [ 1, 2, 3 ],
     "F_t=m\\cdot g": [ 1, 4, 5 ],
     "A=F\\cdot s": [ 8, 9, 10 ],
-    "E_k=A": [ 9, 11 ],
+    "\\Delta E_k=A": [ 9, 11 ],
     "E_k = \\frac{1}{2}\\cdot m\\cdot v^2": [ 1, 6, 11 ],
     "E_{pot}=m\\cdot g\\cdot h": [ 23, 1, 8 ],
     "Q=m\\cdot L": [ 1, 60, 29 ],
@@ -201,7 +209,57 @@
     "F=-k\\cdot x": [ 10, 17, 8 ],
     "F_g=\\mu\\cdot F_N": [ 7, 71, 72 ],
     "F_g\\leq\\mu_s\\cdot F_N": [ 7, 71, 72 ],
-    "F_w=\\frac{1}{2}\\cdot c_w\\cdot A\\cdot\\rho\\cdot v^2": [73, 46, 3, 6]
+    "F_w=\\frac{1}{2}\\cdot c_w\\cdot A\\cdot\\rho\\cdot v^2": [ 73, 46, 3, 6 ],
+    "\\Delta E_{pot}=-A_t": [ 9, 23 ],
+    "E_{mek}=E_{kin}+E_{pot}": [ 11, 23, 75 ],
+    "A=\\Delta E_{mek}": [ 9, 75 ],
+    "E_{pot,fj}=\\frac{1}{2}\\cdot k\\cdot x^2": [ 17, 23, 8 ],
+    "P=F\\cdot v\\cdot\\cos(\\alpha)": [ 61, 6, 10, 22 ],
+    "\\Text{Det skrå kast:  } x=v_0\\cdot\\cos(\\alpha)\\cdot t \\text{  og  } v_x=v_0\\cdot\\cos(\\alpha)": [ 8, 7, 6 ],
+    "\\Text{Det skrå kast:  } y=-\\frac{1}{2}\\cdot g\\cdot t^2+v_0\\cdot\\sin(\\alpha)\\cdot t \\text{  og  } v_y=-g\\cdot t + v_0\\cdot\\sin(\\alpha)": [ 8, 7, 6 ],
+    "I=\\frac{Q}{t}" :[ 40, 7, 50 ],
+    "\\text{parallel:  } \\frac{1}{R}=\\frac{1}{R_1}+\\frac{1}{R_2} ": [ 54 ],
+    "\\text{Serie:  } R=R_1+R_2 ": [ 54 ],
+    "I=I_1+I_2": [ 50 ],
+    "E=R\\cdot I^2\\cdot t": [ 76, 54, 50, 7 ],
+    "U=\\frac{A}{Q}": [ 48, 9, 40 ],
+    "U=R\\cdot I": [ 48, 50, 54 ],
+    "\\text{Serie:  } U=U_1+U_2": [ 48 ],
+    "P=R\\cdot I^2": [ 54, 50, 61 ],
+    "R=\\rho\\cdot\\frac{L}{A}": [ 46, 54, 8, 77 ],
+    "R_t=R_0\\cdot (1+\\alpha\\cdot\\Delta T)": [ 54, 33, 78 ],
+    "U=U_0-R_i\\cdotI": [ 48, 50, 61 ],
+    "\\text{Vekselstrøm:  } U=U_0\\cdot\\sin(\\omega\\cdot t)": [ 7, 48, 14 ],
+    "\\text{Vekselstrøm:  } U_{eff}=\\frac{U_0}{\\sqrt{2}}": [ 48 ],
+    "\\text{Vekselstrøm:  } P_{eff}=\\frac{U^2_{eff}}{R}": [ 61, 48, 54 ],
+    "\\text{Vekselstrøm:  } I_{eff}=\\frac{I_0}{\\sqrt{2}}": [ 50 ],
+    "v=\\lambda\\cdot f": [ 6, 79, 16 ],
+    "c=\\lambda\\cdot f": [ 79, 16 ],
+    "\\lambda=\\frac{d\\cdot\\sin(\\theta_m)}{m}\\text{,  hvor  }m=0,1,2...": [ 22, 8, 79 ],
+    "i=u": [ 22 ],
+    "\\frac{\\sin(i)}{\\sin(b)}=n_{12}": [ 22, 81 ],
+    "\\frac{v_1}{v_2}=n_{12}": [ 6, 81 ],
+    "n=\\frac{c}{v}": [ 80, 6 ],
+    "n_{12}=\\frac{n_2}{n_1}": [ 80, 81 ],
+    "\\sin(i_{kririsk})=n_{12}": [ 22, 81 ],
+    "\\text{Stående bølge fastgjort i begge ender:  }L=n\\cdot\\frac{\\lambda}{2}\\text{,  hvor  }n=1,2,3... " :[ 8, 79 ],
+    "\\text{Stående bølge fastgjort i den ene ende:  }L=n\\cdot\\frac{\\lambda}{2}+\\frac{\\lambda}{4}\\text{,  hvor  }n=1,2,3... ": [ 8, 79 ],
+    "\\text{Dobblereffekt} f'=\\frac{f}{1-\\frac{v}{v_{lyd}}}": [ 16, 6 ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
