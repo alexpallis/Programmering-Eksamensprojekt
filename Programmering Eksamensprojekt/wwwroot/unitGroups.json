@@ -112,7 +112,7 @@
     "I=\\sum m_i\\cdot r_i^2": [ 24, 1, 8 ],
     "E_{rot}=\\frac{1}{2}\\cdot I\\cdot\\omega^2": [ 74, 14, 24 ],
     "I=I_0+m\\cdot d^2": [ 24, 1, 8 ],
-    "\\vec{L}=\\vec{r}\\times \\vec{p}": [ 25, 8, 18 ],
+    "\\vec{L}=\\vec{r}\\times \\vec{p}": [ 25, 8 ],
     "\\vec{M}=\\frac{\\Delta \\vec{L}}{\\Delta t}": [ 20, 25, 7 ],
     "\\frac{r^3}{T^2}=konstant": [ 8, 27 ],
     "L=I\\cdot\\omega": [ 25, 24, 14 ],

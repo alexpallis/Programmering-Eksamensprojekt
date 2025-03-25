@@ -3,7 +3,7 @@
 @using System.IO
 @using Microsoft.AspNetCore.Components
 @using Programmering_Eksamensprojekt.Services
-@inject IJSRuntime JS
+@* @inject IJSRuntime JSRuntime *@
 @inject HttpClient Http
 
 <PageTitle>Home</PageTitle>
@@ -75,6 +75,7 @@
     List<string> Suggestions = new();
     List<string> InputSuggestions = new();
     Dictionary<string, string> nameToNumber = new();
+    Dictionary<string, string> numberToName = new();
 
     // User inputs
     private string Output;
@@ -93,28 +94,54 @@
             {
                 var sizeJsonElement = (JsonElement)parsedData["Størrelse"];
                 var sizeDict = JsonSerializer.Deserialize<Dictionary<string, int>>(sizeJsonElement.GetRawText());
+                Console.WriteLine("1");
 
                 if (sizeDict != null)
                 {
                     nameToNumber = sizeDict.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString());
                 }
             }
-
-            if (parsedData != null && parsedData.ContainsKey("unitGroups"))
+            Console.WriteLine($"ParsedData Keys: {string.Join(", ", parsedData.Keys)}");
+            if (parsedData != null && parsedData.ContainsKey("Formler"))
             {
-                var groupsJsonElement = (JsonElement)parsedData["unitGroups"];
-                var rawUnitGroups = JsonSerializer.Deserialize<List<List<string>>>(groupsJsonElement.GetRawText());
-
-                unitGroups = rawUnitGroups
+                var groupsJsonElement = (JsonElement)parsedData["Formler"];
+                var rawUnitGroups = JsonSerializer.Deserialize < Dictionary<string, List<int>>> (groupsJsonElement.GetRawText());
+                //var rawUnitGroups = JsonSerializer.Deserialize<List<List<string>>>(groupsJsonElement.GetRawText());
+                Console.WriteLine("2");
+                /*unitGroups = rawUnitGroups
                     .Select(group => group
                         .Select(item => nameToNumber.ContainsKey(item) ? nameToNumber[item] : item)
-                        .ToList())
+                    .ToList())
                     .ToList();
+                */
+                unitGroups = rawUnitGroups.Values
+                     .Select(group => group
+                         .Select(item => item.ToString())
+                         .ToList())
+                     .ToList();
+                if (rawUnitGroups != null)
+                {
+                    //numberToName = rawUnitGroups.ToDictionary(kvp => string.Join(", ", kvp.Value), kvp => kvp.Key);
+                    foreach (var kvp in rawUnitGroups)  // Assuming formulaDict is your parsed JSON
+                    {
+                        string formula = kvp.Key;  // The key is the formula string
+
+                        foreach (int number in kvp.Value)  // Loop through each number in the list
+                        {
+                            string numberKey = number.ToString(); // Convert number to string for consistency
+
+                            if (!numberToName.ContainsKey(numberKey))
+                                numberToName[numberKey] = formula;
+                        }
+                    }
+
+                }
+
             }
 
             //p1String = "Loaded sizes: " + string.Join(", ", nameToNumber.Select(kvp => $"{kvp.Key}={kvp.Value}"));
-            p9String = "Unit Groups (Raw): " + JsonSerializer.Serialize(unitGroups);
-            p9String = "Unit Groups: " + string.Join(" | ", unitGroups.Select(g => string.Join(", ", g)));
+            //p4String = "Unit Groups (Raw): " + JsonSerializer.Serialize(unitGroups);
+            //p9String = "Unit Groups: " + string.Join(" | ", unitGroups.Select(g => string.Join(", ", g)));
             pString = "JSON virker hype.";
         }
         catch (Exception ex)
@@ -171,17 +198,22 @@
             .ToList();
       
 
-        bool Success = false;
+        bool Succes = false;
         HashSet<string> HSInput = new(inputNumbers);
         HashSet<string> requiredUnits = new() { outputNumber };
         requiredUnits.UnionWith(inputNumbers);
 
         List<List<string>> AlreadyFound = new();
         List<List<string>> FinalEquations = new();
-        Success = Search(outputNumber, HSInput, AlreadyFound, FinalEquations, requiredUnits);
+        Succes = Search(outputNumber, HSInput, AlreadyFound, FinalEquations, requiredUnits);
 
-        p10String = Success ? "Succes" : "Fail";
-        p8String = Success ? string.Join(" ", FinalEquations.Select(eq => "\\(" + $"{string.Join(", ", eq)}" + "\\)")) : "";
+        foreach (var kvp in numberToName)
+        {
+            Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}" + "AHHHHHH");
+        }
+        p10String = Succes ? "Succes" : "Fail";
+        //p8String = Succes ? string.Join(" ", formulaNames.Select(f => "\\(" + $"{f}" + "\\)")) : "";
+        p8String = Succes ? string.Join(" ", FinalEquations.Select(eq => "\\(" + $"{string.Join(", ", eq.Select(item => numberToName.ContainsKey(item) ? string.Join("/", numberToName[item]) : item))}" + "\\)")) : "";
 
         await InvokeAsync(StateHasChanged);
         await Task.Delay(100);
@@ -190,13 +222,12 @@
 
     private async Task CallMathJax()
     {
-        await JS.InvokeVoidAsync("CallMathJax");
+        if (mathJaxRenderer != null) { await mathJaxRenderer.RenderMath(); }
     }
 
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations, HashSet<string> requiredUnits)
     {
         p2String = $"Searching for: {Output}, Given Inputs: {string.Join(", ", HSInput)}";
-
         List<List<string>> matchingFormulas = unitGroups
             .Where(kvp => new HashSet<string>(kvp).IsSubsetOf(requiredUnits) && kvp.Contains(Output))
             .ToList();
