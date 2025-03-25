@@ -107,7 +107,7 @@
     "\\vec{F}_{res} = \\frac{\\Delta \\vec{p}}{\\Delta t}": [ 19, 18, 7 ],
     "\\vec{p}_{tot} = \\sum_{i=1}^{\\infty} \\vec{p}_i": [ 18 ],
     "\\vec{p}_{før}=\\vec{p}_{efter}": [ 18 ],
-    "v=u\\cdot\\ln\\frac{m_0}{m}": [ 1, 6 ],
+    "\\text{RaketLigning:  }v=u\\cdot\\ln\\frac{m_0}{m}": [ 1, 6 ],
     "\\vec{M}=\\vec{r}\\times \\vec{F}": [ 20, 8, 10 ],
     "I=\\sum m_i\\cdot r_i^2": [ 24, 1, 8 ],
     "E_{rot}=\\frac{1}{2}\\cdot I\\cdot\\omega^2": [ 74, 14, 24 ],

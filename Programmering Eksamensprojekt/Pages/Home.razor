@@ -3,7 +3,6 @@
 @using System.IO
 @using Microsoft.AspNetCore.Components
 @using Programmering_Eksamensprojekt.Services
-@* @inject IJSRuntime JSRuntime *@
 @inject HttpClient Http
 
 <PageTitle>Home</PageTitle>
@@ -75,7 +74,7 @@
     List<string> Suggestions = new();
     List<string> InputSuggestions = new();
     Dictionary<string, string> nameToNumber = new();
-    Dictionary<string, string> numberToName = new();
+    Dictionary<string, List<string>> numberToName = new();
 
     // User inputs
     private string Output;
@@ -106,14 +105,7 @@
             {
                 var groupsJsonElement = (JsonElement)parsedData["Formler"];
                 var rawUnitGroups = JsonSerializer.Deserialize < Dictionary<string, List<int>>> (groupsJsonElement.GetRawText());
-                //var rawUnitGroups = JsonSerializer.Deserialize<List<List<string>>>(groupsJsonElement.GetRawText());
                 Console.WriteLine("2");
-                /*unitGroups = rawUnitGroups
-                    .Select(group => group
-                        .Select(item => nameToNumber.ContainsKey(item) ? nameToNumber[item] : item)
-                    .ToList())
-                    .ToList();
-                */
                 unitGroups = rawUnitGroups.Values
                      .Select(group => group
                          .Select(item => item.ToString())
@@ -121,28 +113,27 @@
                      .ToList();
                 if (rawUnitGroups != null)
                 {
-                    //numberToName = rawUnitGroups.ToDictionary(kvp => string.Join(", ", kvp.Value), kvp => kvp.Key);
-                    foreach (var kvp in rawUnitGroups)  // Assuming formulaDict is your parsed JSON
+                    foreach (var kvp in rawUnitGroups)
                     {
-                        string formula = kvp.Key;  // The key is the formula string
-
-                        foreach (int number in kvp.Value)  // Loop through each number in the list
+                        string formula = kvp.Key;
+                        List<string> numbers = new();
+                        foreach (int number in kvp.Value) 
                         {
-                            string numberKey = number.ToString(); // Convert number to string for consistency
-
-                            if (!numberToName.ContainsKey(numberKey))
-                                numberToName[numberKey] = formula;
+                            numbers.Add(number.ToString());
                         }
+                        string key = string.Join(",", numbers);
+
+                        if (!numberToName.ContainsKey(key))
+                        {
+                            numberToName[key] = new List<string>(); 
+                        }
+
+                        numberToName[key].Add(formula);
                     }
 
                 }
 
             }
-
-            //p1String = "Loaded sizes: " + string.Join(", ", nameToNumber.Select(kvp => $"{kvp.Key}={kvp.Value}"));
-            //p4String = "Unit Groups (Raw): " + JsonSerializer.Serialize(unitGroups);
-            //p9String = "Unit Groups: " + string.Join(" | ", unitGroups.Select(g => string.Join(", ", g)));
-            pString = "JSON virker hype.";
         }
         catch (Exception ex)
         {
@@ -196,7 +187,7 @@
         List<string> inputNumbers = SelectedSizes
             .Select(i => nameToNumber.TryGetValue(i, out string num) ? num : i)
             .ToList();
-      
+
 
         bool Succes = false;
         HashSet<string> HSInput = new(inputNumbers);
@@ -212,9 +203,19 @@
             Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}" + "AHHHHHH");
         }
         p10String = Succes ? "Succes" : "Fail";
-        //p8String = Succes ? string.Join(" ", formulaNames.Select(f => "\\(" + $"{f}" + "\\)")) : "";
-        p8String = Succes ? string.Join(" ", FinalEquations.Select(eq => "\\(" + $"{string.Join(", ", eq.Select(item => numberToName.ContainsKey(item) ? string.Join("/", numberToName[item]) : item))}" + "\\)")) : "";
-
+        foreach (var eq in FinalEquations)
+        {
+            Console.WriteLine("Equation: " + string.Join(", ", eq));
+        }
+        List<string> FinalEquationsName = new();
+        foreach (var List in FinalEquations)
+        {
+            string key = string.Join(",", List);
+            List<String> Formler = numberToName[key];
+            FinalEquationsName.AddRange(Formler);
+        }
+        //p8String = Succes ? string.Join(" ", FinalEquations.Select(eq => "\\(" + $"{string.Join(", ", eq.Select(item => numberToName.ContainsKey(item) ? string.Join("/", numberToName[item]) : item))}" + "\\)")) : "";
+        p8String = string.Join(",", FinalEquationsName.Distinct().ToList().Select(eq => "\\(" + $"{eq}" + "\\)").ToList());
         await InvokeAsync(StateHasChanged);
         await Task.Delay(100);
         await CallMathJax();
