@@ -1,7 +1,12 @@
-﻿window.renderMathJax = function () {
+﻿window.renderMathJax = function (element) {
     if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise()
-            .catch((err) => console.error("MathJax rendering error:", err));
+        if (element) {
+            // Process only the provided element
+            window.MathJax.typesetPromise([element])
+                .catch((err) => console.error("MathJax rendering error:", err));
+        } else {
+            console.warn("renderMathJax called with null or undefined element.");
+        }
     } else {
         console.error("MathJax is not loaded!");
     }
