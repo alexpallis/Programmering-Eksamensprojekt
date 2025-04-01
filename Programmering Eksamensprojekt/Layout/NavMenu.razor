@@ -10,7 +10,7 @@
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="" @onclick="NavigateToHome" Match=" NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
@@ -21,8 +21,24 @@
         </div>
     </nav>
 </div>
-
+@* <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <a class="nav-link" href="#" @onclick="NavigateToHome">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </a>
+        </div>
+        <div class="nav-item px-3">
+            <a class="nav-link" href="#" @onclick="NavigateToHelp">
+                <span aria-hidden="true">?</span> Help page
+            </a>
+        </div>
+    </nav>
+</div>
+ *@
 @code {
+    @inject NavigationManager NavManager
+    
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -30,5 +46,13 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+    private void NavigateToHome()
+    {
+        NavManager.NavigateTo("/", forceLoad: true);
+    }
+    private void NavigateToHelp()
+    {
+        NavManager.NavigateTo("/help page", forceLoad: true);
     }
 }

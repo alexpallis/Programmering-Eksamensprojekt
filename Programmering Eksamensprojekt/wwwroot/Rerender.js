@@ -5,3 +5,7 @@
         console.error("MathJax is not loaded.");
     }
 };
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("Re-initializing MathJax after navigation...");
+    window.renderMathJax();
+});
