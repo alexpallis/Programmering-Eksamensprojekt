@@ -1,4 +1,5 @@
-﻿namespace Programmering_Eksamensprojekt.Services
+﻿//This Code was written by ChatGPT
+namespace Programmering_Eksamensprojekt.Services
 {
     using Microsoft.JSInterop;
     using System.Threading.Tasks;

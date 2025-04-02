@@ -1,4 +1,6 @@
 ﻿window.renderMathJax = function () {
+ 
+//This Code was written by ChatGPT    
     if (window.MathJax) {
         MathJax.typesetPromise();
     } else {

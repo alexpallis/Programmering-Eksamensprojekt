@@ -16,26 +16,14 @@
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="Help page">
-                <span aria-hidden="true">?</span> Help page
+                <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="18" font-weight="bold" font-family="Arial" fill="currentColor">?&#160</text>
+                </svg> &#160;&#160;Help page
             </NavLink>
         </div>
     </nav>
 </div>
-@* <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <a class="nav-link" href="#" @onclick="NavigateToHome">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </a>
-        </div>
-        <div class="nav-item px-3">
-            <a class="nav-link" href="#" @onclick="NavigateToHelp">
-                <span aria-hidden="true">?</span> Help page
-            </a>
-        </div>
-    </nav>
-</div>
- *@
+
 @code {
     @inject NavigationManager NavManager
     
@@ -47,12 +35,10 @@
     {
         collapseNavMenu = !collapseNavMenu;
     }
+    
+    //Forces the program to reload when going back to the main page to avoid crashin
     private void NavigateToHome()
     {
         NavManager.NavigateTo("/", forceLoad: true);
-    }
-    private void NavigateToHelp()
-    {
-        NavManager.NavigateTo("/help page", forceLoad: true);
     }
 }

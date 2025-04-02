@@ -13,8 +13,8 @@
 
 @inject MathJaxRenderer mathJaxRenderer;
 
-<h1>Skriv hvad du vil finde bro</h1>
-<p>Skriv dit output her:</p>
+<h1>Søgeside</h1>
+<p>Skriv den fysiske størrelse du gerne vil finde her</p>
 <!-- Input field for user to enter output with suggestions dropdown -->
 <input id="outputField" type="text" @bind="Output" @oninput="UpdateSuggestions" list="suggestionsList" />
 <datalist id="suggestionsList">
@@ -24,7 +24,7 @@
     }
 </datalist>
 
-<p>Vælg dine størrelser en ad gangen:</p>
+<p>Vælg de størrelser du har en ad gangen:</p>
 <!-- Input field for selecting sizes with suggestions dropdown -->
 <input id="inputField" type="text" @bind-value="CurrentInput" @oninput="UpdateInputSuggestions" list="inputSuggestionsList" />
 <datalist id="inputSuggestionsList">
@@ -49,32 +49,17 @@
 
 <!-- Display results -->
 <p>@pString</p>
-<p>@p1String</p>
-<p>@p2String</p>
-<p>@p3String</p>
-<p>@p4String</p>
-<p>@p5String</p>
-<p>@p6String</p>
-<p>@p7String</p>
+<br>
 <div @key="EquationsWithLineBreak">
     @EquationsWithLineBreak
 </div>
-<p>@p9String</p>
+<br />
 <p>@p10String</p>
 
 @code {
     // Variables for storing output and results
     string pString = ""; // General output string
-    string p1String = "";
-    string p2String = "";
-    string p3String = "";
-    string p4String = "";
-    string p5String = "";
-    string p6String = "";
-    string p7String = "";
-    string p8String = "";
-    string p9String = "";
-    string p10String = "";
+    string p10String = ""; //Succes and fali string 
     MarkupString EquationsWithLineBreak = new(); // Stores equations with line breaks
 
     // Data structures for storing size groups and formulas
@@ -154,7 +139,7 @@
             // Handle errors while loading JSON data
             pString = $"Error loading JSON: {ex.Message}";
         }
-}
+    }
 
     // Updates the dropdown suggestions for the output field based on user input
     private void UpdateSuggestions(ChangeEventArgs e)
@@ -196,6 +181,11 @@
     // Handles the logic when the search button is clicked
     private async Task onSearchButtonClicked()
     {
+        p10String = "Thinking..."; //Ensures that the user can see that the program is thinking
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(200);
+
+
         // Convert output name to number if available, otherwise keep it as is
         string outputNumber = nameToNumber.TryGetValue(Output, out string tempOutput) ? tempOutput : Output;
 
@@ -222,6 +212,7 @@
         }
 
         p10String = Succes ? "Succes" : "Fail"; // Update success message
+        if (!Succes) { FinalEquations.Clear(); } //Clears the list if no solution found
 
         // Log and store final equations
         foreach (var eq in FinalEquations)
@@ -238,8 +229,8 @@
         }
 
         // Format equations for MathJax rendering
-        p8String = string.Join("<br><br>", FinalEquationsName.Distinct().ToList().Select(eq => "\\(" + $"{eq}" + "\\)").ToList());
-        EquationsWithLineBreak = (MarkupString)p8String; // Store formatted equations
+        string equations = string.Join("<br><br>", FinalEquationsName.Distinct().ToList().Select(eq => "\\(" + $"{eq}" + "\\)").ToList());
+        EquationsWithLineBreak = (MarkupString)equations; // Store formatted equations
         await InvokeAsync(StateHasChanged); // Refresh UI
 
         await Task.Delay(100); // Small delay before calling MathJax
@@ -271,8 +262,6 @@
     // Searches for equations that match the required units
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations, HashSet<string> requiredUnits)
     {
-        p2String = $"Searching for: {Output}, Given Inputs: {string.Join(", ", HSInput)}";
-
         // Find matching formulas that contain the output and are a subset of required units
         List<List<string>> matchingFormulas = unitGroups
             .Where(kvp => new HashSet<string>(kvp).IsSubsetOf(requiredUnits) && kvp.Contains(Output))
