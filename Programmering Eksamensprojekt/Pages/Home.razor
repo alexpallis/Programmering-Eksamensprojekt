@@ -45,7 +45,7 @@
 </ul>
 
 <!-- Search button -->
-<button id="buttonSearch" @onclick="onSearchButtonClicked">Search</button>
+<button id="buttonSearch" @onclick="onSearchButtonClicked">Søg</button>
 
 <!-- Display results -->
 <p>@pString</p>
@@ -201,9 +201,10 @@
 
         List<List<string>> AlreadyFound = new(); // Track already processed formulas
         List<List<string>> FinalEquations = new(); // Store final valid equations
+        int Max = 1; //integer for capping search length
 
         // Attempt to find a valid equation using the Search function
-        Succes = Search(outputNumber, HSInput, AlreadyFound, FinalEquations, requiredUnits);
+        Succes = Search(outputNumber, HSInput, AlreadyFound, FinalEquations, requiredUnits, ref Max);
 
         // Log formulas for debugging
         foreach (var kvp in numberToName)
@@ -211,7 +212,7 @@
             Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
         }
 
-        p10String = Succes ? "Succes" : "Fail"; // Update success message
+        p10String = Succes ? "Succes" : "Fejl: Ingen formler fundet"; // Update success message
         if (!Succes) { FinalEquations.Clear(); } //Clears the list if no solution found
 
         // Log and store final equations
@@ -260,8 +261,12 @@
     }
 
     // Searches for equations that match the required units
-    private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations, HashSet<string> requiredUnits)
+    private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations, HashSet<string> requiredUnits,ref int Max)
     {
+        //Creates a maximum amount of calls of the function, so the program doesn't search indefinitely 
+        Max++;
+        if (Max > 50) { FinalEquations.Clear(); return false; }
+        
         // Find matching formulas that contain the output and are a subset of required units
         List<List<string>> matchingFormulas = unitGroups
             .Where(kvp => new HashSet<string>(kvp).IsSubsetOf(requiredUnits) && kvp.Contains(Output))
@@ -274,7 +279,6 @@
             {
                 FinalEquations.Add(list);
             }
-            p10String = "Success";
             return true;
         }
 
@@ -289,7 +293,6 @@
 
         if (groupsWithOutput.Count == 0)
         {
-            p10String = "Fail: Ingen formler fundet."; // No formulas found
             return false;
         }
 
@@ -349,13 +352,13 @@
         {
             FinalEquations.AddRange(matchingGroups2);
             FinalEquations.AddRange(matchingGroups3);
-            p10String = "Success";
             return true;
         }
 
         // Recursively search for missing variables
         foreach (var group in groupsWithOutput)
         {
+            bool succes = true;
             HashSet<string> HSMissingVariables = new(group);
             HSMissingVariables.Remove(Output);
             HSMissingVariables.ExceptWith(HSInput);
@@ -364,18 +367,21 @@
 
             foreach (string variable in HSMissingVariables)
             {
-                if (!Search(variable, HSInput, AlreadyFound, FinalEquations, requiredUnits))
+                if (!Search(variable, HSInput, AlreadyFound, FinalEquations, requiredUnits, ref Max))
                 {
                     AlreadyFound.Remove(group);
-                    return false;
+                    succes = false;
+                    break;
+
                 }
             }
-            FinalEquations.Add(group);
-            p10String = "Success";
-            return true;
-        }
+            if (succes)
+            {
+                FinalEquations.Add(group);
+                return true;
+            }
 
-        p10String = "Fail: Ingen formler fundet.";
+        }
         return false;
     }
 }

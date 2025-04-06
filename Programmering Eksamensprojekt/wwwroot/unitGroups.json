@@ -79,7 +79,9 @@
     "Resistanstemperaturkoefficient": 78,
     "Bølgelængde": 79,
     "Brydningsindeks": 80,
-    "Brydningsforhold":  81
+    "Brydningsforhold": 81,
+    "Carnotvirkningsgrad": 82,
+    "Carnot effektfaktor": 83
 
 
 
@@ -118,7 +120,7 @@
     "\\text{Cylindrisk ring:  } I_0=\\frac{1}{2}\\cdot m\\cdot (r^2 + R^2)": [ 24, 1, 8 ],
     "\\text{Kegle:  } I_0=\\frac{3}{10}\\cdot m\\cdot r^2": [ 24, 1, 8 ],
     "\\text{Plade:  } I_0=\\frac{1}{12}\\cdot m\\cdot (a^2+b^2)": [ 24, 1, 8 ],
-    "\\vec{L}=\\vec{r}\\times \\vec{p}": [ 25, 8 ],
+    "\\vec{L}=\\vec{r}\\times \\vec{p}": [ 25, 8, 18 ],
     "\\vec{M}=\\frac{\\Delta \\vec{L}}{\\Delta t}": [ 20, 25, 7 ],
     "\\frac{r^3}{T^2}=konstant": [ 8, 27 ],
     "L=I\\cdot\\omega": [ 25, 24, 14 ],
@@ -142,8 +144,8 @@
     "\\eta=1-\\frac{Q_{afg}}{Q_{tilf}}": [ 29, 37 ],
     "\\text{Varmepumpe:  } \\varepsilon_{vp}=\\frac{Q_{afg}}{A_{tilf}}": [ 29, 30, 38 ],
     "\\text{Køleanlæg:  } \\varepsilon_{køl}=\\frac{Q_{tilf}}{A_{tilf}}": [ 29, 30, 38 ],
-    "\\text{Carnotprocess:  } \\eta_c=1-\\frac{T_0}{T}": [ 33, 37 ],
-    "\\text{Carnotprocess:  } \\varepsilon_{køl}=\\frac{1}{\\frac{T}{T_0}-1}": [ 33, 38 ],
+    "\\text{Carnotprocess:  } \\eta_c=1-\\frac{T_0}{T}": [ 33, 82 ],
+    "\\text{Carnotprocess:  } \\varepsilon_{køl}=\\frac{1}{\\frac{T}{T_0}-1}": [ 33, 83 ],
     "E_{kin, gen}=\\frac{3}{2}\\cdot k_B\\cdot T": [ 11, 33 ],
     "\\text{Monoatomar gas:  } c_{mV}=\\frac{3}{2}\\cdot R": [ 34 ],
     "F_q=k_c\\cdot\\frac{q\\cdot Q}{r^2}": [ 39, 40, 8 ],
@@ -232,7 +234,7 @@
     "U=\\frac{A}{Q}": [ 48, 9, 40 ],
     "U=R\\cdot I": [ 48, 50, 54 ],
     "\\text{Serie:  } U=U_1+U_2": [ 48 ],
-    "P=R\\cdot I^2": [ 54, 50, 61 ],
+    "P=\\frac{U^2}{R}": [ 54, 48, 61 ],
     "R=\\rho\\cdot\\frac{L}{A}": [ 46, 54, 8, 77 ],
     "R_t=R_0\\cdot (1+\\alpha\\cdot\\Delta T)": [ 54, 33, 78 ],
     "U_p=U_0-R_i\\cdot I": [ 48, 50, 54 ],
