@@ -12,7 +12,7 @@
 <script src="Rerender.js"></script>
 
 @inject MathJaxRenderer mathJaxRenderer;
-
+<!-- Primært Alex -->
 <h1>Søgeside</h1>
 <p>Skriv den fysiske størrelse du gerne vil finde her</p>
 <!-- Input field for user to enter output with suggestions dropdown -->
@@ -43,7 +43,7 @@
         <li>@size <button @onclick="() => RemoveSize(size)">X</button></li>
     }
 </ul>
-
+<!-- Primært Bertil -->
 <!-- Search button -->
 <button id="buttonSearch" @onclick="onSearchButtonClicked">Search</button>
 
@@ -57,6 +57,7 @@
 <p>@p10String</p>
 
 @code {
+    // Primært Alex
     // Variables for storing output and results
     string pString = ""; // General output string
     string p10String = ""; //Succes and fali string 
@@ -161,7 +162,7 @@
             .ToList();
         InvokeAsync(StateHasChanged); // Refresh the UI asynchronously
     }
-
+    // Primært Bertil
     // Adds the currently selected size to the list of selected sizes
     private void AddSize()
     {
@@ -185,7 +186,7 @@
         await InvokeAsync(StateHasChanged);
         await Task.Delay(200);
 
-
+        // Primært Alex
         // Convert output name to number if available, otherwise keep it as is
         string outputNumber = nameToNumber.TryGetValue(Output, out string tempOutput) ? tempOutput : Output;
 
@@ -236,7 +237,7 @@
         await Task.Delay(100); // Small delay before calling MathJax
         await CallMathJax(); // Render MathJax
     }
-
+    // Primært Bertil
     // Calls MathJax to render mathematical equations in the UI
     private async Task CallMathJax()
     {
@@ -258,7 +259,7 @@
         if (mathJaxRenderer != null) { await mathJaxRenderer.RenderMath(); }
 
     }
-
+    
     // Searches for equations that match the required units
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations, HashSet<string> requiredUnits)
     {
