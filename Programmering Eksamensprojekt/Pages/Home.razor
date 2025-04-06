@@ -222,7 +222,7 @@
         {
             Console.WriteLine("Equation: " + string.Join(", ", eq));
         }
-
+        // Primært Bertil
         List<string> FinalEquationsName = new();
         foreach (var list in FinalEquations)
         {
@@ -239,7 +239,6 @@
         await Task.Delay(100); // Small delay before calling MathJax
         await CallMathJax(); // Render MathJax
     }
-    // Primært Bertil
     // Calls MathJax to render mathematical equations in the UI
     private async Task CallMathJax()
     {
@@ -262,6 +261,7 @@
 
     }
     
+    // Primært Bertil
     // Searches for equations that match the required units
     private bool Search(string Output, HashSet<string> HSInput, List<List<string>> AlreadyFound, List<List<string>> FinalEquations, HashSet<string> requiredUnits,ref int Max)
     {
