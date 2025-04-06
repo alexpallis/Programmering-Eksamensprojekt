@@ -267,7 +267,7 @@
     {
         //Creates a maximum amount of calls of the function, so the program doesn't search indefinitely 
         Max++;
-        if (Max > 50) { FinalEquations.Clear(); return false; }
+        if (Max > 50) {return false; }
         
         // Find matching formulas that contain the output and are a subset of required units
         List<List<string>> matchingFormulas = unitGroups
