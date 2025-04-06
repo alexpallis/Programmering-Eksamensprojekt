@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Programmering_Eksamensprojekt;
-//using Programmering_Eksamensprojekt.wwwroot;
 using Programmering_Eksamensprojekt.Services;
 using System.Diagnostics;
 using System.Text.Json;

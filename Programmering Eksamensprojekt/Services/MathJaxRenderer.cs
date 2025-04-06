@@ -1,4 +1,4 @@
-﻿//This Code was written by ChatGPT
+﻿//This code was written by ChatGPT
 namespace Programmering_Eksamensprojekt.Services
 {
     using Microsoft.JSInterop;

@@ -1,6 +1,6 @@
-﻿window.renderMathJax = function () {
- 
-//This Code was written by ChatGPT    
+﻿//This Code was written by ChatGPT
+window.renderMathJax = function () {
+    
     if (window.MathJax) {
         MathJax.typesetPromise();
     } else {
@@ -11,3 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Re-initializing MathJax after navigation...");
     window.renderMathJax();
 });
+
+
+
